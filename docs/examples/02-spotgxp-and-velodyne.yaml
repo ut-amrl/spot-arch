@@ -1,0 +1,14 @@
+network:
+        version: 2
+        renderer: networkd
+
+        ethernets:
+                # Spot GXP:
+                enxd0374592f1b2:
+                        dhcp4: no
+                        addresses: [192.168.50.100/16]
+    
+                # Velodyne:
+                enxd037452cef82:
+                        dhcp4: no
+                        addresses: [192.168.1.100/24]
