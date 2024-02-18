@@ -7,7 +7,7 @@
 - Follow the installation process. Do select 'Normal Install', 'Allow updates during install' and 'Install third-party software for graphics and Wi-Fi hardware and additional media formats' option.
 - When you reach the "Installation type" screen, select the "Something else" option and click "Continue".
 - Partitioning:
-    - Follow steps [here](https://chat.openai.com/share/d2e58736-7ed1-45c2-a120-e3d218b7e8a4)
+    - Follow steps [here](https://chat.openai.com/share/d2e58736-7ed1-45c2-a120-e3d218b7e8a4) <span style="color:red">(TODO: write partitioning steps)</span>
 - Follow all prompts upto the end of the installation process. It will ask you to restart your computer. Do so and remove the USB drive when prompted.
 
 ## Setting up the fresh Ubuntu 20.04
@@ -76,7 +76,7 @@
         - `sudo mv libtorch /opt/`
 - `sudo apt update && sudo apt upgrade`
 - `sudo apt autoremove && sudo apt autoclean && sudo apt clean`
-- Setup SSH server and optionally add any keys:
+- Setup SSH server:
     - `sudo apt install openssh-server -y`
     - `sudo systemctl status ssh` to check if it's running. If not, run `sudo systemctl start ssh` to start it.
     - `sudo systemctl enable ssh` to enable it on startup.
@@ -100,6 +100,14 @@
     - Reboot.
     - `sudo systemctl status wg-quick@wg0` to check if it's running.
     - Get it registered with the [AMRL server](https://github.com/ut-amrl/amrl-documentation/blob/master/computers/wireguard-vpn.md#adding-clients-to-server).
+- Setup power settings so that laptop won't turn off:
+    - `sudo vi /etc/systemd/logind.conf` and change the following lines:
+        ```
+        HandleLidSwitch=ignore
+        HandleLidSwitchExternalPower=ignore
+        HandleLidSwitchDocked=ignore
+        ```
+    - `sudo systemctl restart systemd-logind`
 - Configure network interfaces for the sensors: Assign static IPs to the ethernet interfaces for convenience. An example file is provided [here](examples/02-spotgxp-and-velodyne.yaml). Place it in `/etc/netplan` with correct permissions (`644`). Then execute the following commands:
     - `sudo systemctl start systemd-networkd`
     - `sudo systemctl enable systemd-networkd`
