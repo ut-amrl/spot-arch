@@ -121,7 +121,7 @@
         - Do not initialize conda in `.bashrc`, i.e., do not accept `conda init` option.
     - `sudo chown -R root:root /opt/anaconda3`
     - `sudo chmod -R 755 /opt/anaconda3`
-    - Automatic activation of conda environment for all users:
+    - Add conda initialization to make it work in `sudo -i` mode:
         - `sudo vi /etc/profile.d/misc.sh` and append the following lines:
             ```
             # Anaconda3
@@ -146,6 +146,17 @@
         - `conda activate`. Now any pip installs will place packages in the shared `base` environment. Else, it would have put it in `home/user/.local/bin` directory. And doing `sudo pip3 install` would have put it in system-wide python installation directory.
         - `pip install rospkg empy==3.3.4`
         - `pip install virtualenv protobuf==3.20.1 cython bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1` - some additional things needed for other stuff.
+        - For conda bash completion, do `conda install -c conda-forge conda-bash-completion` and add the following lines to `/etc/profile.d/misc.sh`:
+            ```
+            # Conda bash completion
+            CONDA_ROOT=/opt/anaconda3   # <- set to your Anaconda/Miniconda installation directory
+            if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
+                source $CONDA_ROOT/etc/profile.d/bash_completion.sh
+            else
+                echo "WARNING: could not find conda-bash-completion setup script"
+            fi
+            ```
+        - Reboot.
 
 ### ROS Noetic installation ([reference](http://wiki.ros.org/noetic/Installation/Ubuntu))
 - Setup your sources.list:
@@ -199,6 +210,11 @@
     ```
 - `vi ~/.gitconfig` and add the following lines if not there already:
     ```
+    [user]
+	    name = AMRL User
+	    email = amrl_user@gmail.com
+    [credential]
+    	helper = store
     [remote "origin"]
         prune = true
     [filter "lfs"]
@@ -207,11 +223,50 @@
         process = git-lfs filter-process
         required = true
     ```
+- Open Settings -> Power and set `Blank screen` to `Never` and `Automatic suspend` to `Off`.
 - Create a catkin workspace:
     - `mkdir -p ~/catkin_ws/src`
     - `cd ~/catkin_ws/`
     - `catkin_make`
     - `echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc`
+- Add the following lines to `~/.bashrc`:
+    ```
+    # Anaconda3
+    # >>> conda initialize >>>
+    # !! Contents within this block are managed by 'conda init' !!
+    __conda_setup="$('/opt/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
+    else
+        if [ -f "/opt/anaconda3/etc/profile.d/conda.sh" ]; then
+            . "/opt/anaconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="/opt/anaconda3/bin:$PATH"
+        fi
+    fi
+    unset __conda_setup
+    # <<< conda initialize <<<
+
+    # Conda bash completion
+    CONDA_ROOT=/opt/anaconda3   # <- set to your Anaconda/Miniconda installation directory
+    if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
+        source $CONDA_ROOT/etc/profile.d/bash_completion.sh
+    else
+        echo "WARNING: could not find conda-bash-completion setup script"
+    fi
+    ```
+- `vi ~/.condarc` and add the following lines:
+    ```
+    auto_activate_base: false
+    ```
+
+<!-- 
+
+- after that you need to investigate whats the correct path order: like first conda or what
+- actually yk what, do this, if conda first in path, do an automatic `conda deactivate` in bash.bashrc or sth and then when you need to make sth or do anything else, you need to explicitly do conda activate
+- Avoid `conda deactivate` command. It messes up the environment variables. Instead, logout and log back in the remote session. 
+
+-->
 
 ## Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
@@ -223,6 +278,7 @@
     - `cd ~/catkin_ws`
     - `catkin_make`
 - Clone the following repositories in the `~/ut-amrl` directory:
+    - `mkdir ~/ut-amrl`
     - AMRL msgs:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/amrl_msgs.git --recursive`
