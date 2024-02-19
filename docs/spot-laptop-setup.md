@@ -121,7 +121,7 @@
         - Do not initialize conda in `.bashrc`, i.e., do not accept `conda init` option.
     - `sudo chown -R root:root /opt/anaconda3`
     - `sudo chmod -R 755 /opt/anaconda3`
-    - Add conda initialization to make it work in `sudo -i` mode:
+    - Add conda initialization (required for conda to be accessible in `sudo -i` mode):
         - `sudo vi /etc/profile.d/misc.sh` and append the following lines:
             ```
             # Anaconda3
@@ -146,16 +146,7 @@
         - `conda activate`. Now any pip installs will place packages in the shared `base` environment. Else, it would have put it in `home/user/.local/bin` directory. And doing `sudo pip3 install` would have put it in system-wide python installation directory.
         - `pip install rospkg empy==3.3.4`
         - `pip install virtualenv protobuf==3.20.1 cython bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1` - some additional things needed for other stuff.
-        - For conda bash completion, do `conda install -c conda-forge conda-bash-completion` and add the following lines to `/etc/profile.d/misc.sh`:
-            ```
-            # Conda bash completion
-            CONDA_ROOT=/opt/anaconda3   # <- set to your Anaconda/Miniconda installation directory
-            if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
-                source $CONDA_ROOT/etc/profile.d/bash_completion.sh
-            else
-                echo "WARNING: could not find conda-bash-completion setup script"
-            fi
-            ```
+        - For conda bash completion, do `conda install -c conda-forge conda-bash-completion`. 
         - Reboot.
 
 ### ROS Noetic installation ([reference](http://wiki.ros.org/noetic/Installation/Ubuntu))
@@ -259,14 +250,17 @@
     ```
     auto_activate_base: false
     ```
-
-<!-- 
-
-- after that you need to investigate whats the correct path order: like first conda or what
-- actually yk what, do this, if conda first in path, do an automatic `conda deactivate` in bash.bashrc or sth and then when you need to make sth or do anything else, you need to explicitly do conda activate
-- Avoid `conda deactivate` command. It messes up the environment variables. Instead, logout and log back in the remote session. 
-
--->
+- Reboot.
+- After this, the behaviour of conda is as follows:
+    - In normal user shell:
+        - conda completion should be working
+        - default python is system python
+        - conda activate will access the system-wide base conda environment
+        - conda deactivate will deactivate the conda environment and revert to system python
+    - In `sudo -i` shell:
+        - conda completion should be working
+        - default python is conda base python (even if you aren't explicitly in the `base` conda environment)
+        - conda deactivate will revert to system python. You can do `conda activate` to go back to conda base python.
 
 ## Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
