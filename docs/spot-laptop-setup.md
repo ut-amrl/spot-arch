@@ -1,5 +1,5 @@
 # Sudo Steps
-## Dual booting Ubuntu 20.04 with Existing ubuntu 20.04 (for alienware)
+### Dual booting Ubuntu 20.04 with Existing ubuntu 20.04 (for alienware)
 - Get a live bootable usb drive with Ubuntu 20.04 (use balena etcher)
 - Partitioning will happen in the installation process
 - Insert the bootable USB you've created and restart your computer. During the boot process, press F12 to access the boot menu and select the USB drive.
@@ -10,8 +10,8 @@
     - Follow steps [here](https://chat.openai.com/share/d2e58736-7ed1-45c2-a120-e3d218b7e8a4) <span style="color:red">(TODO: write partitioning steps)</span>
 - Follow all prompts upto the end of the installation process. It will ask you to restart your computer. Do so and remove the USB drive when prompted.
 
-## Setting up the fresh Ubuntu 20.04
-### Basic installs
+### Setting up the fresh Ubuntu 20.04
+#### Basic installs
 - Run the following commands in the terminal:
     - `sudo apt update`
     - `sudo apt upgrade`
@@ -19,7 +19,7 @@
     - `sudo apt install python3-dev python3-pip git vim emacs curl wget gdb cmake htop tmux screen nano mesa-utils ppa-purge`
     - `sudo pip3 install virtualenv`
 
-### Nvidia drivers ([reference](https://askubuntu.com/questions/206283/how-can-i-uninstall-a-nvidia-driver-completely))
+#### Nvidia drivers ([reference](https://askubuntu.com/questions/206283/how-can-i-uninstall-a-nvidia-driver-completely))
 - Remove the existing nvidia drivers CLEANLY and FULLY by running the following commands in the terminal:
     - `sudo apt-get remove --purge '^nvidia-.*'`
     - `sudo apt-get install ubuntu-desktop`
@@ -33,13 +33,13 @@
     - NOTE: after this, nvidia-smi should work and show the driver version. It may show CUDA runtime version as well.
         * <span style="color:gray; font-size:smaller;">ChatGPT: _"The output of nvidia-smi is showing a CUDA version because the NVIDIA driver comes with a bundled version of the CUDA runtime, which allows running CUDA applications. However, the CUDA toolkit, which includes the compilers, debugging tools, and other resources you need for CUDA development, is a separate installation. The CUDA runtime version shown in nvidia-smi indicates the highest CUDA version that is compatible with the installed NVIDIA driver. Even if you haven't explicitly installed the CUDA toolkit, the driver still supports running applications built with that CUDA version. If you want to use CUDA for development, you would need to install the CUDA toolkit separately, which typically includes the installation of the /usr/local/cuda directory. If you plan to work with CUDA, you can download the appropriate version of the toolkit from NVIDIA's website that matches the CUDA version shown in nvidia-smi."_</span>
 
-### CUDA Toolkit
+#### CUDA Toolkit
 - Go to [nvidia's website](https://developer.nvidia.com/cuda-toolkit-archive) and download the desired version of CUDA Toolkit for your system. For instance, you could do 11.6 for a Linux 64-bit machine running Ubuntu 20.04.
     - Use deb (local) method
 - Reboot.
 - Check nvidia-smi - you should see CUDA (and likely the driver version as well) version updated.
 
-### cuDNN installation ([reference](https://docs.nvidia.com/deeplearning/cudnn/installation/linux.html#package-manager-local-installation))
+#### cuDNN installation ([reference](https://docs.nvidia.com/deeplearning/cudnn/installation/linux.html#package-manager-local-installation))
 - Go to [nvidia's website](https://developer.nvidia.com/cudnn) and select the appropriate options for your system. Use deb (local) method. For instance, for Ubuntu 20.04 and CUDA 11.6, execute following commands:
     - `wget https://developer.download.nvidia.com/compute/cudnn/9.0.0/local_installers/cudnn-local-repo-ubuntu2004-9.0.0_1.0-1_amd64.deb`
     - `sudo dpkg -i cudnn-local-repo-ubuntu2004-9.0.0_1.0-1_amd64.deb`
@@ -60,7 +60,7 @@
 - Reboot.
 - Test `nvidia-smi` and `nvcc -V` - you should see both versions matching.
 
-### Additional steps including quality of life improvements
+#### Additional steps including quality of life improvements
 - `sudo apt-get install libfreeimage3 libfreeimage-dev`
 - `sudo apt autoremove && sudo apt autoclean && sudo apt clean`
 - `sudo apt install net-tools`
@@ -91,7 +91,7 @@
         - `sudo systemctl restart ssh`
 - Setup AMRL wireguard vpn ([reference](https://github.com/ut-amrl/amrl-documentation/blob/master/computers/wireguard-vpn.md))
     - `sudo apt-get install wireguard wireguard-tools`
-    - Enter sudo mode: `sudo -i`
+    - Enter sudo mode (i.e., executing commands as root user): `sudo -i`
     - `cd /etc/wireguard`
     - `wg genkey | tee wg-private.key | wg pubkey > wg-public.key`
     - Create `/etc/wireguard/wg0.conf` file and add the contents as shown in the reference link.
@@ -115,7 +115,7 @@
 - Installing a shared anaconda3 to preserve storage (root access to modify base env, users can create their own envs):
     - `sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6`
     - `curl -O https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh`
-    - Enter sudo mode: `sudo -i`
+    - Enter sudo mode (i.e., executing commands as root user): `sudo -i`
     - `bash Anaconda3-2022.10-Linux-x86_64.sh`
         - Install to `/opt/anaconda3`
         - Do not initialize conda in `.bashrc`, i.e., do not accept `conda init` option.
@@ -142,14 +142,14 @@
             ```
         - Reboot.
     - This will place your anaconda3 bin path before the system python path in your `$PATH` variable. So any compile or build commands will use the anaconda3 python by default, even if you aren't explicitly in the `base` conda environment. So, install the needed packages in the `base` environment.
-        - Enter sudo mode: `sudo -i`
+        - Enter sudo mode (i.e., executing commands as root user): `sudo -i`
         - `conda activate`. Now any pip installs will place packages in the shared `base` environment. Else, it would have put it in `home/user/.local/bin` directory. And doing `sudo pip3 install` would have put it in system-wide python installation directory.
         - `pip install rospkg empy==3.3.4`
         - `pip install virtualenv protobuf==3.20.1 cython bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1` - some additional things needed for other stuff.
         - For conda bash completion, do `conda install -c conda-forge conda-bash-completion`. 
         - Reboot.
 
-### ROS Noetic installation ([reference](http://wiki.ros.org/noetic/Installation/Ubuntu))
+#### ROS Noetic installation ([reference](http://wiki.ros.org/noetic/Installation/Ubuntu))
 - Setup your sources.list:
     - `sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'`
 - Set up your keys:
@@ -164,9 +164,10 @@
     - `sudo rosdep init`
     - `rosdep update`
 - `sudo apt-get install python-is-python3`
+- `sudo apt-get install ros-noetic-ros-numpy`
 - `sudo pip3 install rospkg`
 
-### Some more installs to support AMRL repositories
+#### Some more installs to support AMRL repositories
 - `sudo apt-get update && sudo apt-get install -y apt-utils curl python-is-python3 python3-catkin-tools python3-pip software-properties-common`
 - `sudo apt-get update && sudo apt-get install -y libgtest-dev libgoogle-glog-dev cmake build-essential` (https://github.com/ut-amrl/amrl_shared_lib)
 - `sudo apt-get update && sudo apt-get install -y libgoogle-glog-dev libgflags-dev liblua5.1-0-dev` (https://github.com/ut-amrl/graph_navigation)
@@ -261,8 +262,9 @@
         - conda completion should be working
         - default python is conda base python (even if you aren't explicitly in the `base` conda environment)
         - conda deactivate will revert to system python. You can do `conda activate` to go back to conda base python.
+    - _**Since all packages were installed in the system-wide `base` conda environment, you should use the `base` environment for building and compiling, including `catkin_make`.**_
 
-## Setup AMRL repositories
+### Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
     - Vectornav:
         - `git clone git@github.com:dawonn/vectornav.git --recursive`
