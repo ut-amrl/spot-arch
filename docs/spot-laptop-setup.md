@@ -262,7 +262,7 @@
         - conda completion should be working
         - default python is conda base python (even if you aren't explicitly in the `base` conda environment)
         - conda deactivate will revert to system python. You can do `conda activate` to go back to conda base python.
-    - _**Since all packages were installed in the system-wide `base` conda environment, you should use the `base` environment for building and compiling, including `catkin_make`.**_
+    - _**Since all packages were installed in the system-wide `base` conda environment, you can use the `base` environment for building and compiling, including `catkin_make`.**_
 
 ### Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
@@ -275,7 +275,7 @@
     - `conda activate && catkin_make`
 - Clone the following repositories in the `~/ut-amrl` directory:
     - `mkdir ~/ut-amrl`
-    - AMRL msgs:
+    - **AMRL msgs**:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/amrl_msgs.git --recursive`
         - Add the following line to `~/.bashrc`:
@@ -284,7 +284,7 @@
             ```
         - `cd ~/ut-amrl/amrl_msgs`
         - `conda activate && source ~/.bashrc && make -j$(nproc)`
-    - K4A ROS:
+    - **K4A ROS**:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/k4a_ros.git`
         - `cd ~/ut-amrl/k4a_ros`
@@ -295,7 +295,7 @@
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/k4a_ros
             ```
         - `conda activate && source ~/.bashrc && make -j$(nproc)`
-    - Spot Autonomy:
+    - **Spot Autonomy**:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/spot_autonomy.git --recursive`
         - Create symlinks for convenience:
