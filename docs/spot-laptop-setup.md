@@ -272,7 +272,7 @@
     - Spot ROS:
         - `git clone git@github.com:ut-amrl/spot_ros.git --recursive`
     - `cd ~/catkin_ws`
-    - `catkin_make`
+    - `conda activate && catkin_make`
 - Clone the following repositories in the `~/ut-amrl` directory:
     - `mkdir ~/ut-amrl`
     - AMRL msgs:
@@ -283,7 +283,7 @@
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/amrl_msgs
             ```
         - `cd ~/ut-amrl/amrl_msgs`
-        - `make -j$(nproc)`
+        - `conda activate && source ~/.bashrc && make -j$(nproc)`
     - K4A ROS:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/k4a_ros.git`
@@ -294,17 +294,21 @@
             ```
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/k4a_ros
             ```
-        - `make -j$(nproc)`
+        - `conda activate && source ~/.bashrc && make -j$(nproc)`
     - Spot Autonomy:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/spot_autonomy.git --recursive`
+        - Create symlinks for convenience:
+            - `ln -s ~/ut-amrl/spot_autonomy/graph_navigation ~/ut-amrl/graph_navigation`
+            - `ln -s ~/ut-amrl/spot_autonomy/webviz ~/ut-amrl/webviz`
+            - `ln -s ~/ut-amrl/spot_autonomy/maps ~/ut-amrl/amrl_maps`
         - Add the following lines to `~/.bashrc`:
             ```
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/spot_autonomy
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/spot_autonomy/graph_navigation
             ```
         - `cd ~/ut-amrl/spot_autonomy`
-        - `make -j$(nproc)`
+        - `conda activate && source ~/.bashrc && make -j$(nproc)`
             - _If you get an error saying `undefined reference to `uuid_generate@UUID_1.0'`, then do this [reference](https://github.com/uzh-rpg/rpg_esim/issues/7):_
                 - `sudo apt-get install uuid-dev`
                 - `sudo mkdir /opt/anaconda3/libuuid`
