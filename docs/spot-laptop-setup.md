@@ -64,7 +64,7 @@
 - `sudo apt-get install libfreeimage3 libfreeimage-dev`
 - `sudo apt autoremove && sudo apt autoclean && sudo apt clean`
 - `sudo apt install net-tools`
-- `sudo apt install acpi`
+- `sudo apt install acpi quota`
 - `sudo apt-get install python3-tk`
 - Install git-lfs:
     - `curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash`
@@ -186,7 +186,7 @@
     - `sudo apt-get update && sudo apt-get install -y ros-noetic-twist-mux ros-noetic-interactive-marker-twist-server ros-noetic-velodyne-pointcloud`
     - `sudo pip3 install protobuf==3.20.1` for system-wide protobuf installation.
     - `sudo pip3 install cython empy bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1` for system-wide bosdyn installation.
-- `sudo apt-get update && sudo apt-get install -y alsa-base alsa-utils pulseaudio joystick ffmpeg espeak mpg123`
+- `sudo apt-get update && sudo apt-get install -y alsa-base alsa-utils pulseaudio joystick ffmpeg espeak mpg123 pavucontrol`
 
 <!-- <span style="color:red">(This has to be done for each user account)</span> -->
 # User Account Steps
@@ -262,7 +262,7 @@
         - conda completion should be working
         - default python is conda base python (even if you aren't explicitly in the `base` conda environment)
         - conda deactivate will revert to system python. You can do `conda activate` to go back to conda base python.
-    - _**Since all packages were installed in the system-wide `base` conda environment, you can use the `base` environment for building and compiling, including `catkin_make`.**_
+    - _**Since all packages were also installed in the system-wide `base` conda environment, you can use the `base` environment for building and compiling, including `catkin_make`.**_
 
 ### Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
@@ -343,3 +343,12 @@
     - Set known_hosts to have read/write access for everyone
         - `sudo chown root:root .ssh/known_hosts`
         - `sudo chmod 666 .ssh/known_hosts`
+- To set user quotas (for group quotas to work, you'll need to change file ownerships to group):
+    - `sudo vi /etc/fstab` and add `usrquota` to the root partition
+        - for instance, change `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro 0       1` to `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro,usrquota 0       1`
+    - `sudo reboot`
+    - `sudo quotacheck -cugm /` to initialize the quota files
+    - `sudo quotaon -v /` to turn on the quotas
+    - Assign quotas to users, in terms of number of blocks. The block size is `1024 bytes`. For instance, to set a 40 GB soft limit and a 50 GB hard limit for a user:
+        - `sudo setquota -u <username> 41943040 52428800 0 0 /` to set the limits for a user
+    - `sudo reboot`
