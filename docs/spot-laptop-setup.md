@@ -192,6 +192,8 @@
 # User Account Steps
 - Run `git lfs install` to initialize git-lfs for the user account.
 - `rosdep update` to update the rosdep database.
+- Set user's quota limit (for instance, 40 GB soft limit and 50 GB hard limit):
+    - `sudo setquota -u <username> 41943040 52428800 0 0 /`
 - `vi ~/.vimrc` and add the following lines:
     ```
     set number
