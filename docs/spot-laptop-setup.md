@@ -205,7 +205,7 @@
     - `sudo -u <username> touch /home/<username>/.ssh/authorized_keys`
     - Add ssh key(s) to the `authorized_keys` file.
     - `sudo setquota -u <username> 41943040 52428800 0 0 /` to set the limits for the user (for instance, 40 GB soft limit and 50 GB hard limit).
-- SSH into the user account.
+- Login into the user account.
 - Run `git lfs install` to initialize git-lfs for the user account.
 - `rosdep update` to update the rosdep database.    
 - `vi ~/.vimrc` and add the following lines:
@@ -267,7 +267,7 @@
     auto_activate_base: false
     ```
 - Reboot.
-- After this, the behaviour of conda is as follows:
+- <span style="color:gray">[INFO] After this, the behaviour of conda is as follows:
     - In normal user shell:
         - conda completion should be working
         - default python is system python
@@ -278,9 +278,11 @@
         - default python is conda base python (even if you aren't explicitly in the `base` conda environment)
         - conda deactivate will revert to system python. You can do `conda activate` to go back to conda base python.
     - _**Since all packages were also installed in the system-wide `base` conda environment, you can use the `base` environment for building and compiling, including `catkin_make`.**_
+</span>
 
 ### Setup AMRL repositories
 - Clone the following repositories in the `~/catkin_ws/src` directory:
+    - `cd ~/catkin_ws/src`
     - Vectornav:
         - `git clone git@github.com:dawonn/vectornav.git --recursive`
         - `vi vectornav/params/vn200.yaml` and change the `imu_output_rate` to 200 Hz.
@@ -301,14 +303,12 @@
         - `conda activate && source ~/.bashrc && make -j$(nproc)`
     - **K4A ROS**:
         - `cd ~/ut-amrl`
-        - `git clone git@github.com:ut-amrl/k4a_ros.git`
-        - `cd ~/ut-amrl/k4a_ros`
-        - `git checkout sadanand/spot`
-        - `git submodule update --init --recursive`
+        - `git clone git@github.com:ut-amrl/k4a_ros.git --recursive`
         - Add the following line to `~/.bashrc`:
             ```
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/k4a_ros
             ```
+        - `cd ~/ut-amrl/k4a_ros`
         - `conda activate && source ~/.bashrc && make -j$(nproc)`
     - **Spot Autonomy**:
         - `cd ~/ut-amrl`
