@@ -198,16 +198,16 @@
 
 <!-- <span style="color:red">(This has to be done for each user account)</span> -->
 # User Account Steps
-- Add a new user account: `sudo adduser <username>` and follow the prompts.
+- From a sudo account, add a new user account: `sudo adduser <username>` and follow the prompts. Once created:
     - Run `sudo -u <username> xdg-user-dirs-update` to create the default directories for the new user.
     - `sudo -u <username> mkdir /home/<username>/.ssh`
     - `sudo -u <username> chmod 700 /home/<username>/.ssh`
     - `sudo -u <username> touch /home/<username>/.ssh/authorized_keys`
     - Add ssh key(s) to the `authorized_keys` file.
+    - `sudo setquota -u <username> 41943040 52428800 0 0 /` to set the limits for the user (for instance, 40 GB soft limit and 50 GB hard limit).
+- SSH into the user account.
 - Run `git lfs install` to initialize git-lfs for the user account.
-- `rosdep update` to update the rosdep database.
-- Set user's quota limit (for instance, 40 GB soft limit and 50 GB hard limit):
-    - `sudo setquota -u <username> 41943040 52428800 0 0 /`
+- `rosdep update` to update the rosdep database.    
 - `vi ~/.vimrc` and add the following lines:
     ```
     set number
