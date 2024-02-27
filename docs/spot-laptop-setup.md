@@ -108,6 +108,14 @@
         HandleLidSwitchDocked=ignore
         ```
     - `sudo systemctl restart systemd-logind`
+    - `sudo vi /etc/profile.d/disable-blank-screen.sh` and add the following lines:
+        ```
+        #!/bin/sh
+        gsettings set org.gnome.desktop.session idle-delay 0
+        gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+        gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+        ```
+    - `sudo chmod +x /etc/profile.d/disable-blank-screen.sh`
 - Configure network interfaces for the sensors: Assign static IPs to the ethernet interfaces for convenience. An example file is provided [here](examples/02-spotgxp-and-velodyne.yaml). Place it in `/etc/netplan` with correct permissions (`644`). Then execute the following commands:
     - `sudo systemctl start systemd-networkd`
     - `sudo systemctl enable systemd-networkd`
@@ -190,6 +198,12 @@
 
 <!-- <span style="color:red">(This has to be done for each user account)</span> -->
 # User Account Steps
+- Add a new user account: `sudo adduser <username>` and follow the prompts.
+    - Run `sudo -u <username> xdg-user-dirs-update` to create the default directories for the new user.
+    - `sudo -u <username> mkdir /home/<username>/.ssh`
+    - `sudo -u <username> chmod 700 /home/<username>/.ssh`
+    - `sudo -u <username> touch /home/<username>/.ssh/authorized_keys`
+    - Add ssh key(s) to the `authorized_keys` file.
 - Run `git lfs install` to initialize git-lfs for the user account.
 - `rosdep update` to update the rosdep database.
 - Set user's quota limit (for instance, 40 GB soft limit and 50 GB hard limit):
@@ -217,7 +231,6 @@
         process = git-lfs filter-process
         required = true
     ```
-- Open Settings -> Power and set `Blank screen` to `Never` and `Automatic suspend` to `Off`.
 - Create a catkin workspace:
     - `mkdir -p ~/catkin_ws/src`
     - `cd ~/catkin_ws/`
