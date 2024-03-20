@@ -188,7 +188,7 @@
     - `curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -`
     - `sudo apt-add-repository "deb https://packages.microsoft.com/ubuntu/18.04/prod bionic main"`
     - `sudo apt-get update && sudo sh -c 'ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev'`
-    - `wget https://github.com/ut-amrl/k4a_ros/blob/master/99-k4a.rules` and add `99-k4a.rules` file to `/etc/udev/rules.d/` to allow access to the kinect device and reboot to apply the changes. Alternatively, `sudo udevadm control --reload-rules && sudo udevadm trigger` to apply the changes without rebooting.
+    - `wget https://raw.githubusercontent.com/ut-amrl/k4a_ros/master/99-k4a.rules` and add `99-k4a.rules` file to `/etc/udev/rules.d/` to allow access to the kinect device and reboot to apply the changes. Alternatively, `sudo udevadm control --reload-rules && sudo udevadm trigger` to apply the changes without rebooting.
 - `sudo apt-get update && sudo apt-get install -y qt5-default libqt5websockets5-dev libgoogle-glog-dev libgflags-dev` (https://github.com/ut-amrl/spot_autonomy)
 - (https://github.com/ut-amrl/spot_ros)
     - `sudo apt-get update && sudo apt-get install -y ros-noetic-twist-mux ros-noetic-interactive-marker-twist-server ros-noetic-velodyne-pointcloud`
