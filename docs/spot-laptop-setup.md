@@ -321,6 +321,7 @@
             ```
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/spot_autonomy
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/graph_navigation
+            export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/amrl_maps
             ```
         - `cd ~/ut-amrl/spot_autonomy`
         - `conda activate && source ~/.bashrc && make -j$(nproc)`
