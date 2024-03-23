@@ -299,7 +299,7 @@
     - Spot ROS:
         - `git clone git@github.com:ut-amrl/spot_ros.git --recursive`
     - `cd ~/catkin_ws`
-    - `catkin_make`
+    - `catkin_make; catkin_make` (since it sometimes fails to make it properly the first time, possibly some inter-dependency issues)
 - Clone the following repositories in the `~/ut-amrl` directory:
     - `mkdir ~/ut-amrl`
     - **AMRL msgs**:
