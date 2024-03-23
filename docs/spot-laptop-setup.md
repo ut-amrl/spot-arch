@@ -298,7 +298,7 @@
     - Spot ROS:
         - `git clone git@github.com:ut-amrl/spot_ros.git --recursive`
     - `cd ~/catkin_ws`
-    - `conda activate && catkin_make`
+    - `catkin_make`
 - Clone the following repositories in the `~/ut-amrl` directory:
     - `mkdir ~/ut-amrl`
     - **AMRL msgs**:
@@ -309,7 +309,7 @@
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/amrl_msgs
             ```
         - `cd ~/ut-amrl/amrl_msgs`
-        - `conda activate && source ~/.bashrc && make -j$(nproc)`
+        - `source ~/.bashrc && make -j$(nproc)`
     - **K4A ROS**:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/k4a_ros.git --recursive`
@@ -318,7 +318,7 @@
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/k4a_ros
             ```
         - `cd ~/ut-amrl/k4a_ros`
-        - `conda activate && source ~/.bashrc && make -j$(nproc)`
+        - `source ~/.bashrc && make -j$(nproc)`
     - **Spot Autonomy**:
         - `cd ~/ut-amrl`
         - `git clone git@github.com:ut-amrl/spot_autonomy.git --recursive`
@@ -333,7 +333,7 @@
             export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/ut-amrl/amrl_maps
             ```
         - `cd ~/ut-amrl/spot_autonomy`
-        - `conda activate && source ~/.bashrc && make -j$(nproc)`
+        - `source ~/.bashrc && make -j$(nproc)`
             - _If you get an error saying `undefined reference to `uuid_generate@UUID_1.0'`, then do this [reference](https://github.com/uzh-rpg/rpg_esim/issues/7):_
                 - `sudo apt-get install uuid-dev`
                 - `sudo mkdir /opt/anaconda3/libuuid`
