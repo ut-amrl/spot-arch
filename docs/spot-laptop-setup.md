@@ -51,6 +51,13 @@
     - `sudo vi /etc/profile.d/misc.sh` and add the following lines:
         ```
         #!/bin/sh
+
+        # To prevent running twice
+        if [ -n "$_MISC_SH_LOADED" ]; then
+            return 0
+        fi
+        _MISC_SH_LOADED=1
+
         # CUDA
         export CUDA_HOME=/usr/local/cuda
         export PATH=$PATH:$CUDA_HOME/bin
