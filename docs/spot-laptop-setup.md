@@ -129,6 +129,7 @@
     - `sudo systemctl start systemd-networkd`
     - `sudo systemctl enable systemd-networkd`
     - `sudo netplan apply`
+- Refer [here](https://www.cyberciti.biz/howto/quick-tip-display-banner-message-before-openssh-authentication/) if want to add a custom ssh banner message for giving some important information.
 - Installing a shared anaconda3 to preserve storage (root access to modify base env, users can create their own envs):
     - `sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6`
     - `curl -O https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh`
