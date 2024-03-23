@@ -57,6 +57,7 @@
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/lib64
         ```
     - `sudo chmod +x /etc/profile.d/misc.sh`
+    - Enter sudo mode `sudo -i`.
     - `sudo echo 'if [ -f /etc/profile.d/misc.sh ]; then . /etc/profile.d/misc.sh; fi' >> /etc/bash.bashrc`
 - Reboot.
 - Test `nvidia-smi` and `nvcc -V` - you should see both versions matching.
