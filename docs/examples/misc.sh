@@ -32,3 +32,4 @@ unset __conda_setup
 
 # Custom settings
 export DISPLAY=:1
+alias batperc='upower -i /org/freedesktop/UPower/devices/battery_BAT1| grep -E "percentage"'
