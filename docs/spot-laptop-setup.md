@@ -238,17 +238,17 @@
 - `vi ~/.gitconfig` and add the following lines if not there already:
     ```
     [user]
-	    name = AMRL User
-	    email = amrl_user@gmail.com
+    	name = AMRL User
+    	email = amrl_user@gmail.com
     [credential]
     	helper = store
     [remote "origin"]
-        prune = true
+    	prune = true
     [filter "lfs"]
-        clean = git-lfs clean -- %f
-        smudge = git-lfs smudge -- %f
-        process = git-lfs filter-process
-        required = true
+    	clean = git-lfs clean -- %f
+    	smudge = git-lfs smudge -- %f
+    	process = git-lfs filter-process
+    	required = true
     ```
 - Create a catkin workspace:
     - `mkdir -p ~/catkin_ws/src`
