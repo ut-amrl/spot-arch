@@ -344,6 +344,7 @@
 
 # Good practices and Tips
 - Always use ssh-agent forwarding for shared accounts. DO NOT add your keys to the shared account.
+- Example files for the `.bashrc`, `.vimrc`, `.gitconfig`, `misc.sh`, `disable-blank-screen.sh` and `.condarc` files are provided [here](examples/).
 - You might need to add a rules file like [this](examples/99-ttyusb.rules) to `/etc/udev/rules.d/` to allow access to the usb ports (e.g., without that you might see an error when running vectornav).
 - Creating private user and shared anaconda3 environments ([reference](https://stackoverflow.com/questions/37926940/how-to-specify-new-environment-location-for-conda-create) and `conda create --help`):
     - User (private) environment:
