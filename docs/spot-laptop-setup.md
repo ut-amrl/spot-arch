@@ -223,6 +223,7 @@
     - Add ssh key(s) to the `authorized_keys` file.
     - `sudo setquota -u <username> 41943040 52428800 0 0 /` to set the limits for the user (for instance, 40 GB soft limit and 50 GB hard limit).
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
+    - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
 - Login into the user account.
 - Run `git lfs install` to initialize git-lfs for the user account.
 - `rosdep update` to update the rosdep database.    
