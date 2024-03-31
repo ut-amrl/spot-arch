@@ -1,7 +1,10 @@
-******************************** ATTENTION PLEASE ***************************************
-------> To check battery, use 'batperc' (it's a system-wide alias). DO NOT trust acpi.
+************************************************************************ ATTENTION PLEASE **************************************************************
+------> To monitor spot laptop battery, use 'batperc' (it's a system-wide alias). DO NOT trust acpi, nor the Battery symbol that you see on top-right in ubunut-desktop on Spot display screen.
+------> The power banks are labeled 1,2,3 and you can find the usb-c to Barrel port wire around Spot somewhere on the spot shelf. EVEN if the battery symbol on display screen might not show that laptop is charging, use 'batperc' to actually monitor if its charging or not. Typically, it does charge even if symbol doesnt reflect it.
 ------> There is a shared Anaconda3 installation at /opt/anaconda3 -- thereby DO NOT install a local one. The 'base' environment is system-wide shared and can be activated as 'conda activate' as you normally do. You can create your own envs as you normally do and they will be saved LOCALLY in your user account.
-------> Conda TAB completion is also setup system-wide!
+------> TAB completion for Anaconda is also setup system-wide!
 ------> ALL necessary CUDA, ROS, Anaconda3 etc paths have been configured, you do not need to add it yourself in your .bashrc.
-*****************************************************************************************
+------> Any bugs you see should be reported on the amrl-spot-users channel on AMRL Slack.
+------> Please put the laptop, power banks, spot batteries to charging once you are done with your work.
+********************************************************************************************************************************************************
 

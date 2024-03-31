@@ -129,7 +129,26 @@
     - `sudo systemctl start systemd-networkd`
     - `sudo systemctl enable systemd-networkd`
     - `sudo netplan apply`
-- Refer [here](https://www.cyberciti.biz/howto/quick-tip-display-banner-message-before-openssh-authentication/) if want to add a custom ssh banner message for giving some important information.
+- To add a custom banner message to be displayed when a user ssh's into the machine:
+    - Create a [custom banner](examples/custom_info) file (e.g., `/etc/ssh/custom_info`) and add the desired message to be displayed.
+    - `sudo vi /etc/profile.d/ssh-banner.sh` (example [file](examples/ssh-banner.sh)) and add the following lines (displays the banner in red and bold font):
+        ```
+        #!/bin/bash
+        # Check if we are on SSH
+        if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            # ANSI color codes for red and bold
+            RED_BOLD="\033[1;31m"
+            # Reset color
+            RESET="\033[0m"
+
+            # Read the banner content and then print it in red and bold
+            while IFS= read -r line
+            do
+                echo -e "${RED_BOLD}${line}${RESET}"
+            done < /etc/ssh/custom_info
+        fi
+        ```
+    - `sudo chmod +x /etc/profile.d/ssh-banner.sh`
 - To be able to set user quotas:
     - `sudo vi /etc/fstab` and add `usrquota` to the root partition
         - for instance, change `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro 0       1` to `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro,usrquota 0       1`
