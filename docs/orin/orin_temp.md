@@ -42,6 +42,7 @@
     - `sudo systemctl restart ssh`
 
 ## wireguard
+- (update: either do the following, or check out user-space wireguard-go installation https://github.com/WireGuard/wireguard-go)
 - building wireguard supported custom kernel:
     - sudo apt-get install libssl-dev
     - follow this [this, read by archive.is](https://medium.com/@ebinzacharias/enabling-wireguard-on-nvidia-jetson-devices-0887e833cb41), while referring to [this](https://wiki.gentoo.org/wiki/WireGuard#Kernel_5.6_and_higher) if needed
