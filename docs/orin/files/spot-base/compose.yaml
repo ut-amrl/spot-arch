@@ -1,0 +1,33 @@
+services:
+  spot_container:
+    image: spot-base:latest
+    container_name: spot-base
+    hostname: orin
+    runtime: nvidia
+    environment:				# add env vars, will override the ones defined in image
+      - DISPLAY=${DISPLAY}			# X display forwarded
+      - PULSE_SERVER=unix:/run/user/0/pulse/native   # audio forwarding
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - ROS_MASTER_URI=http://10.1.0.3:11311
+      - ROS_IP=10.1.0.3
+      #- SSH_AUTH_SOCK=/ssh-agent   # Set the SSH agent environment variable inside the container
+      - SSH_AUTH_SOCK=/tmp/ssh-agent
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - /dev/dri:/dev/dri:ro  		# Read-only access to graphics card for gpu rendering
+      - /etc/alsa:/etc/alsa:ro		# audio forwarding from host
+      - /usr/share/alsa:/usr/share/alsa:ro
+      - /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:ro   # default container uid is 0 as user root
+      - ${HOME}/.gitconfig:/root/.gitconfig:rw
+      #- ${SSH_AUTH_SOCK}:/ssh-agent   # Mount the host SSH agent socket into the container
+      - /tmp:/tmp
+    stdin_open: true                  	# Keep the container open (interactive mode) (-i)
+    tty: true                         	# Allocate a pseudo-TTY for terminal access  (-t)
+    network_mode: host                	# Equivalent to --network=host
+    ipc: host
+    working_dir: /root
+    group_add:					# usb ports etc access
+      - "dialout"
+    privileged: true				# Allows the container to see all of the host's devices, so easier to setup usb connections etc

@@ -102,6 +102,7 @@
         ```
     - `sudo systemctl restart systemd-logind`
 - To be able to set user quotas:
+    - sudo apt update && sudo apt install quota
     - `sudo vi /etc/fstab` and add `usrquota` to the root partition
         - for instance, change `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro 0       1` to `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro,usrquota 0       1`
     - `sudo reboot`
@@ -112,9 +113,6 @@
 
 
 # User setup
-## set up repos
-- set the host uid on each user by adding export HOST_UID=$(id -u) to user acc .bashrc
-# User Account Steps
 - From a sudo account, add a new user account: `sudo adduser <username>` and follow the prompts. Once created:
     - Run `sudo -u <username> xdg-user-dirs-update` to create the default directories for the new user.
     - `sudo -u <username> mkdir /home/<username>/.ssh`
@@ -125,14 +123,17 @@
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
     - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
 - Login into the user account.
+- set the host uid on each user by adding export HOST_UID=$(id -u) to user acc .bashrc
 - git lfs install
-- setup ~/.vimrc and ~/.gitconfig as in `orin/files/`
+- setup ~/.vimrc and ~/.gitconfig as in `files/`
+- set up your [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding)
 
-## setting up docker image
+## building docker container
+- spot-base is the main docker image. scratch contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
 - docker build -t <image_name> . in the folder containing appropriate Dockerfile (say spot-base image)
 - docker compose up -d && docker attach spot-base in the folder containing appropriate docker-compose.yaml
 - add amrl credentials to spot launch file
-- docker start spot-base && docker attach spot-base
+- docker start spot-base && docker attach spot-base whenever needed to re-enter the container
 
 # TODOs
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well
