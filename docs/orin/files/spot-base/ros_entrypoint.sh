@@ -8,6 +8,29 @@ fi
 
 source "/opt/ros/$ROS_DISTRO/setup.bash" --
 
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/opt/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/opt/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/opt/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/opt/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+# Conda bash completion
+CONDA_ROOT=/opt/miniconda3
+if [[ -r $CONDA_ROOT/etc/profile.d/bash_completion.sh ]]; then
+    source $CONDA_ROOT/etc/profile.d/bash_completion.sh
+else
+    echo "WARNING: could not find conda-bash-completion setup script"
+fi
+
 # Check if the initialization has already been done (using a marker file)
 if [ ! -f /initialized ]; then
 	echo "Running one-time setup for essential repos..."

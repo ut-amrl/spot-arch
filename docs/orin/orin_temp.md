@@ -141,8 +141,6 @@
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well
     * https://developer.nvidia.com/blog/simplifying-cuda-upgrades-for-nvidia-jetson-users/
     * https://docs.nvidia.com/cuda/cuda-for-tegra-appnote/index.html#cuda-upgradable-package-for-jetson
-- add miniconda to the image
-- add conda bash completion to the image
 
 # miscellaneous resources
 * https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html

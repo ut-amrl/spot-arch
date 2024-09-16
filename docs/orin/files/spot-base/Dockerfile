@@ -192,6 +192,15 @@ COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 #RUN wget https://raw.githubusercontent.com/ut-amrl/k4a_ros/master/99-k4a.rules -O /etc/udev/rules.d/99-k4a.rules && \
 #    udevadm control --reload-rules && udevadm trigger
 
+# Install Miniconda to /opt/miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    bash Miniconda3-py310_24.7.1-0-Linux-aarch64.sh -b -p /opt/miniconda3 && \
+    rm Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    /opt/miniconda3/bin/conda config --set auto_activate_base false
+
+# conda bash completion
+RUN /opt/miniconda3/bin/conda install -c conda-forge conda-bash-completion -y
+
 RUN cp -r /usr/include/eigen3/* /usr/include/ && \
     apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get autoclean -y && apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
