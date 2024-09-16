@@ -110,7 +110,6 @@
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
-- make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
 
 
 # User setup
@@ -128,6 +127,8 @@
 - git lfs install
 - setup ~/.vimrc and ~/.gitconfig as in `files/`
 - set up your [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding)
+- make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
+    * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3.
 
 ## building docker container
 - spot-base is the main docker image. scratch contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
