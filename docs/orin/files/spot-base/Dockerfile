@@ -21,6 +21,7 @@ LABEL com.nvidia.volumes.needed="nvidia_driver"
 ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=${PATH}:${CUDA_HOME}/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
+ENV PIP_ROOT_USER_ACTION=ignore
 
 # Set up timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \
@@ -32,14 +33,14 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
 
 # Set up ROS keys
 RUN set -eux; \
-       key='C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'; \
-       export GNUPGHOME="$(mktemp -d)"; \
-       gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-       mkdir -p /usr/share/keyrings; \
-       gpg --batch --export "$key" > /usr/share/keyrings/ros1-latest-archive-keyring.gpg; \
-       gpgconf --kill all; \
-       rm -rf "$GNUPGHOME"
-       
+    key='C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654'; \
+    export GNUPGHOME="$(mktemp -d)"; \
+    gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+    mkdir -p /usr/share/keyrings; \
+    gpg --batch --export "$key" > /usr/share/keyrings/ros1-latest-archive-keyring.gpg; \
+    gpgconf --kill all; \
+    rm -rf "$GNUPGHOME"
+
 # Set up ROS sources for Ubuntu Focal (ARM64)
 RUN echo "deb [ signed-by=/usr/share/keyrings/ros1-latest-archive-keyring.gpg ] http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
 
@@ -60,17 +61,39 @@ CMD ["bash"]
 
 # bootstrap rosdep
 RUN rosdep init && \
-  rosdep update --rosdistro $ROS_DISTRO
+    rosdep update --rosdistro $ROS_DISTRO
+
+#########################################################################################################################################
+
+# tools for torch torchvision
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.8 \
+    python3.8-dev \
+    python3-pip \
+    python-is-python3 \
+    libopenblas-base \
+    libopenblas-dev \
+    libopenmpi-dev \
+    libomp-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpython3-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    cmake \
+    libssl-dev \
+    curl \
+    qt5-default \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
 #########################################################################################################################################
 
 RUN apt-get update && apt-get install -y \
     apt-utils \
     curl \
-    python3 \
-    python-is-python3 \
     python3-catkin-tools \
-    python3-pip \
     software-properties-common \
     build-essential \
     clang-12 \
@@ -96,7 +119,6 @@ RUN apt-get update && apt-get install -y \
     usbutils \
     zip \
     zsh \
-    python3-dev \
     wget \
     htop \
     ppa-purge \
@@ -172,7 +194,7 @@ RUN apt-get update && apt-get install -y \
     libgoogle-perftools-dev \
     cimg-dev \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # Install dependencies for spot_autonomy
 RUN apt-get update && apt-get install -y \
     qt5-default \

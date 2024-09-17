@@ -136,6 +136,8 @@
 - docker compose up -d && docker attach spot-base in the folder containing appropriate docker-compose.yaml
 - add amrl credentials to spot launch file
 - docker start spot-base && docker attach spot-base whenever needed to re-enter the container
+- miniconda is also installed in the image. Use conda commands normal, but for creation, use conda-create instead of conda create (its a wrapper, it sets some torch paths properly)
+- for jetpack 5.1.2, for getting torch, only python 3.8 can be used
 
 # TODOs
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well

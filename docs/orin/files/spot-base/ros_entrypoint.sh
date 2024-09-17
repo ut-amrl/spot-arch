@@ -70,6 +70,35 @@ if [ ! -f /initialized ]; then
 	touch /initialized
 	cd /root
 
+	# conda hooks
+	mkdir -p /root/.conda/hooks/
+	touch /root/.conda/hooks/post-create.sh
+	cat >> /root/.conda/hooks/post-create.sh <<- "END"
+	#!/bin/bash
+
+	# Get the path of the newly created environment
+	env_path=$CONDA_PREFIX
+
+	# Create the activate.d and deactivate.d directories
+	mkdir -p $env_path/etc/conda/activate.d
+	mkdir -p $env_path/etc/conda/deactivate.d
+
+	# Add activation script to set up LD_LIBRARY_PATH and Torch_DIR
+	cat <<EOL > $env_path/etc/conda/activate.d/env_vars.sh
+	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python3.8/site-packages/torch:\$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python3.8/site-packages/torch/lib:\$LD_LIBRARY_PATH
+	export Torch_DIR=\$CONDA_PREFIX/lib/python*/site-packages/torch/share/cmake/Torch
+	EOL
+
+	# Add deactivation script to restore the system-wide paths
+	cat <<EOL > $env_path/etc/conda/deactivate.d/env_vars.sh
+	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python3.8\/site-packages\/torch:/}
+	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python3.8\/site-packages\/torch\/lib:/}
+	export Torch_DIR=/usr/local/lib/python3.8/dist-packages/torch/share/cmake/Torch
+	EOL
+	END
+	chmod +x /root/.conda/hooks/post-create.sh
+
 	# add to .bashrc
 	cat >> /root/.bashrc <<- "END"
 	source "/opt/ros/$ROS_DISTRO/setup.bash"
@@ -113,6 +142,28 @@ if [ ! -f /initialized ]; then
 	if rospack find amrl_msgs &> /dev/null; then
 		export PYTHONPATH="$(rospack find amrl_msgs)/src:${PYTHONPATH}"
 	fi
+
+	conda_create_hook() {
+		# Create the conda environment
+		conda create "$@"
+		
+		# Extract the environment name from the arguments (assumes --name or -n is used)
+		env_name=""
+		for i in "$@"; do
+			if [[ $i == "--name" || $i == "-n" ]]; then
+				shift
+				env_name="$1"
+				break
+			fi
+			shift
+		done
+		
+		conda activate "$env_name"
+		bash ~/.conda/hooks/post-create.sh
+		conda deactivate
+	}
+
+	alias conda-create="conda_create_hook"
 
 	END
 else
