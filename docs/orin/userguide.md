@@ -7,6 +7,8 @@
 - run `git lfs install`
 - setup your `~/.gitconfig` file like [this](files/.gitconfig). Change the name and email to your own.
 - set up [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding) on your local machine, used for sshing into spot user account
+- set up X11 forwarding if you want the display to be forwarded to your local machine:
+    * either add `ForwardX11 yes` and `ForwardX11Trusted yes` to your `~/.ssh/config` file for the entry for spot orin, or run ssh with `-X` and `-Y` flags
 - clone this repo `git clone --recursive --branch orin git@github.com:sadanand1120/spot-arch.git`
 - `cd spot-arch/docs/orin/files/spot-base`
 - `docker build -t spot-base .` builds the docker image

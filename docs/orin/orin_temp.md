@@ -176,3 +176,4 @@ volumes:
     - /usr/share/opencv4:/usr/share/opencv4
     - /opt/nvidia/vpi:/opt/nvidia/vpi
 ```
+* deleting a user including all files etc: `sudo userdel -r <username>`
