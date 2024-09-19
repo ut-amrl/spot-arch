@@ -123,6 +123,7 @@
     - `sudo setquota -u <username> 70G 80G 0 0 /` to set the limits for the user (for instance, 70 GB soft limit and 80 GB hard limit).
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
     - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
+    - `sudo usermod -aG docker <username>` to add the user to the docker group.
 - Login into the user account.
 - set the host uid on each user by adding export HOST_UID=$(id -u) to user acc .bashrc
 - git lfs install

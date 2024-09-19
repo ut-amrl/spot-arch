@@ -17,11 +17,14 @@
     * use `docker images` to check all images
     * to rettach to a stopped container, use `docker start <container> && docker attach <container>`
 - `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to your start-clearpath.launch file (note: NOT the one ending in `.example`)
+- to start the default autonomy stack, run `roslaunch spot_autonomy start_all.launch`
 
 # Notes
 - [spot-base](files/spot-base/) is the main docker image. [scratch](files/scratch/) contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
 - the spot-base image has the following already set up:
+    * ROS1 (noetic)
     * pytorch (python as well as c++ libtorch), torchvision, opencv
+    * git lfs
     * miniconda (at `/opt/miniconda3`). Use `conda-create` instead of conda create (its a wrapper, it sets some torch paths properly if you want to use a different version of torch in your conda env. Additionally, note orin is setup with jetpack 5.1.2. This means for getting torch in your env, only python 3.8 can be used. Resources: [link1](https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048) [link2](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html))
     * conda bash completion (so can use TAB for conda commands)
     * all essential AMRL repositories for standard navigation stack, cloned and built, under `~/catkin_ws` and `~/ut-amrl`
