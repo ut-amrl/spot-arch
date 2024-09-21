@@ -1,6 +1,6 @@
 services:
   spot_container:
-    image: spot-base:latest
+    image: spot-base:${USER}
     container_name: spot-base
     hostname: orin
     runtime: nvidia

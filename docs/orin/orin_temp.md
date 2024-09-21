@@ -69,6 +69,7 @@
     ```
 - sudo systemctl daemon-reload && sudo systemctl start wireguard-setup.service && sudo systemctl enable wireguard-setup.service
 - (To stop wireguard completely: sudo wg-quick down wg0 && sudo systemctl stop wireguard-setup.service && sudo systemctl disable wireguard-setup.service)
+- (NOTE: you MIGHT need to do the last daemon reload and start service commands again once in a while, if the wireguard connection is lost for some reason)
 
 ## netplan
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
@@ -78,11 +79,12 @@
 - sudo systemctl start systemd-networkd && sudo systemctl enable systemd-networkd && sudo netplan apply
 
 ## docker install
-- for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
-- sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
-- sudo rm -rf /var/lib/docker
-- sudo rm -rf /var/lib/containerd
-- sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
+- first do a clean uninstall:
+    - docker system prune -a --volumes; sudo systemctl disable --now docker.service docker.socket; sudo rm /var/run/docker.sock; dockerd-rootless-setuptool.sh uninstall; /usr/bin/rootlesskit rm -rf ~/.local/share/docker
+    - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+    - sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+    - sudo rm -rf /var/lib/docker && sudo rm -rf /var/lib/containerd && sudo rm -rf /etc/docker && rm -rf ~/.config/docker
+    - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt-get update && sudo apt-get install ca-certificates curl
 - sudo install -m 0755 -d /etc/apt/keyrings
 - sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -91,7 +93,7 @@
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-- sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+- sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
 - sudo groupadd docker
 - sudo usermod -aG docker $USER
 
@@ -117,6 +119,7 @@
         HandleLidSwitchDocked=ignore
         ```
     - `sudo systemctl restart systemd-logind`
+    - `cd ~ && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/disable-blank-screen.sh && chmod +x disable-blank-screen.sh && sudo mv disable-blank-screen.sh /etc/profile.d/`
 - To be able to set user quotas:
     - sudo apt update && sudo apt install quota
     - `sudo vi /etc/fstab` and add `usrquota` to the root partition
@@ -126,14 +129,18 @@
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
 - to remove a possible ssh lag after boot up (`System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)`):
-    - sudo systemctl edit systemd-networkd-wait-online.service
-    - add the following near the top at the designated place:
-        ```
-        [Service]
-        ExecStart=
-        ExecStart=/usr/bin/true
-        ```
-    - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
+    - try:
+        - sudo systemctl stop systemd-networkd-wait-online.service && sudo systemctl disable systemd-networkd-wait-online.service
+    - else:
+        - sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
+        - sudo systemctl edit systemd-networkd-wait-online.service
+        - add the following near the top at the designated place:
+            ```
+            [Service]
+            ExecStart=
+            ExecStart=/usr/bin/true
+            ```
+        - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
 
 
 # User setup
