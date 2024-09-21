@@ -16,13 +16,13 @@
 
 # Post-setup
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
-- sudo apt install python3-pip
+- sudo apt install python3-pip firefox
 - sudo pip3 install -U jetson-stats
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 
 ## basic packages
 - sudo apt install build-essential gcc g++ make python3-dev python3-pip git vim emacs curl wget gdb cmake htop tmux screen nano mesa-utils ppa-purge software-properties-common
-- sudo apt install python-is-python3 clang-12 clang-format valgrind iputils-ping less mesa-utils net-tools rsync tree unzip usbutils zip zsh htop
+- sudo apt install apt-utils python-is-python3 clang-12 clang-format valgrind iputils-ping less mesa-utils net-tools rsync tree unzip usbutils zip zsh htop
 - sudo apt-get install libfreeimage3 libfreeimage-dev libopenblas-dev python3-tk ffmpeg espeak mpg123
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 
@@ -42,19 +42,38 @@
     - `sudo systemctl restart ssh`
 
 ## wireguard
-- (update: either do the following, or check out user-space wireguard-go installation https://github.com/WireGuard/wireguard-go)
-- building wireguard supported custom kernel:
-    - sudo apt-get install libssl-dev
-    - follow this [this, read by archive.is](https://medium.com/@ebinzacharias/enabling-wireguard-on-nvidia-jetson-devices-0887e833cb41), while referring to [this](https://wiki.gentoo.org/wiki/WireGuard#Kernel_5.6_and_higher) if needed
+(update: either do the following, or check out user-space wireguard-go installation https://github.com/WireGuard/wireguard-go) (update 2: on jetpack 6, kernel 5.15, modifying kernel config DID NOT work. So, had to use wireguard-go)
+- sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
+- sudo apt update && sudo apt install wireguard wireguard-tools
 - sudo -i
-- cd /etc/wireguard && wg genkey | tee wg-private.key | wg pubkey > wg-public.key && touch /etc/wireguard/wg0.conf
-- fill in the contents of wg0.conf (and copy over the keys here) in /etc/wireguard
-- sudo wg-quick up wg0 && sudo systemctl enable wg-quick@wg0
+- cd /etc/wireguard
+- copy over wireguard files (wg0.conf and keys) here
+- wget https://go.dev/dl/go1.20.9.linux-arm64.tar.gz
+- sudo tar -C /usr/local -xzf go1.20.9.linux-arm64.tar.gz && rm go1.20.9.linux-arm64.tar.gz
+- export PATH=$PATH:/usr/local/go/bin && go version
+- export PATH=$PATH:/usr/bin && git --version
+- git clone https://git.zx2c4.com/wireguard-go && cd wireguard-go && make -j$(nproc)
+- sudo vi /etc/systemd/system/wireguard-setup.service:
+    ```
+    [Unit]
+    Description=Custom WireGuard Setup based on wireguard-go
+    After=network.target
+
+    [Service]
+    Type=oneshot
+    RemainAfterExit=yes
+    ExecStart=/bin/bash -c 'cd /etc/wireguard/wireguard-go && ./wireguard-go wg0 && sudo ip address add dev wg0 10.1.0.3/32 && sudo wg setconf wg0 /etc/wireguard/wg0.conf && sudo ip link set up dev wg0 && sudo ip route add 10.0.0.0/24 dev wg0 && sudo ip route add 10.1.0.0/16 dev wg0 && sudo ip route add 10.2.0.0/16 dev wg0 && sudo ip route add 10.3.0.0/16 dev wg0'
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+- sudo systemctl daemon-reload && sudo systemctl start wireguard-setup.service && sudo systemctl enable wireguard-setup.service
+- (To stop wireguard completely: sudo wg-quick down wg0 && sudo systemctl stop wireguard-setup.service && sudo systemctl disable wireguard-setup.service)
 
 ## netplan
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt install netplan.io
-- copy over netplan config files (permissions 644) and place in /etc/netplan
+- copy over netplan config files (permissions 600) and place in /etc/netplan
     * have to connect actual devices (one by one) and do ip a to get the eth connection names, modify the netplan config files accordingly
 - sudo systemctl start systemd-networkd && sudo systemctl enable systemd-networkd && sudo netplan apply
 
@@ -64,8 +83,7 @@
 - sudo rm -rf /var/lib/docker
 - sudo rm -rf /var/lib/containerd
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
-- sudo apt-get update
-- sudo apt-get install ca-certificates curl
+- sudo apt-get update && sudo apt-get install ca-certificates curl
 - sudo install -m 0755 -d /etc/apt/keyrings
 - sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 - sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -73,8 +91,7 @@
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-- sudo apt-get update
-- sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+- sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 - sudo groupadd docker
 - sudo usermod -aG docker $USER
 
@@ -84,9 +101,7 @@
   && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-- sudo apt-get update
-- sudo apt install apt-utils
-- sudo apt-get install -y nvidia-container-toolkit
+- sudo apt-get update && sudo apt-get install nvidia-container-toolkit
     - you might need to do sudo apt --fix-broken install
     - re run sudo apt-get install -y nvidia-container-toolkit
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
@@ -105,11 +120,20 @@
 - To be able to set user quotas:
     - sudo apt update && sudo apt install quota
     - `sudo vi /etc/fstab` and add `usrquota` to the root partition
-        - for instance, change `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro 0       1` to `UUID=401615fc-572a-4c30-9c0d-d62dd13db87d /               ext4    errors=remount-ro,usrquota 0       1`
+        - for instance, change `/dev/root            /                     ext4           defaults                                     0 1` to `/dev/root            /                     ext4           defaults,usrquota                                     0 1`
     - `sudo reboot`
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
+- to remove a possible ssh lag after boot up (`System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)`):
+    - sudo systemctl edit systemd-networkd-wait-online.service
+    - add the following near the top at the designated place:
+        ```
+        [Service]
+        ExecStart=
+        ExecStart=/usr/bin/true
+        ```
+    - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
 
 
 # User setup
@@ -128,6 +152,7 @@
 - set the host uid on each user by adding export HOST_UID=$(id -u) to user acc .bashrc
 - git lfs install
 - setup ~/.vimrc and ~/.gitconfig as in `files/`
+    * cd $HOME && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.vimrc
 - set up your [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding)
 - make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
     * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3.
