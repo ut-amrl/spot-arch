@@ -1,7 +1,7 @@
 services:
   spot_container:
     image: spot-base:${USER}
-    container_name: spot-base
+    container_name: spot-base-${USER}
     hostname: orin
     runtime: nvidia
     environment:				# add env vars, will override the ones defined in image

@@ -141,9 +141,42 @@
             ExecStart=/usr/bin/true
             ```
         - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
+- add to /etc/bash.bashrc:
+    ```
+    export HOST_UID=$(id -u)
+    
+    # Function to prompt for confirmation before running risky docker remove commands
+    docker() {
+        # List of docker commands that should trigger the prompt
+        risky_commands=("rm" "rmi" "prune")
 
+        # Check if the first/second argument is in the list of risky commands
+        if [[ " ${risky_commands[@]} " =~ " $1 " || " ${risky_commands[@]} " =~ " $2 " ]]; then
+            # Red color output
+            RED='\033[0;31m'
+            # No color (reset)
+            NC='\033[0m'
 
-# User setup
+            echo -e "${RED}Are you sure you want to do this? Make sure you do NOT remove other users' containers/images. (y/n)${NC}"
+            read -r confirmation
+
+            if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
+                # If confirmed, run the original docker command
+                command docker "$@"
+            else
+                echo "Aborted."
+            fi
+        else
+            # For all other docker commands, run normally
+            command docker "$@"
+        fi
+    }
+    ```
+- make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
+    * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3
+    * sudo jetson_clocks is not persistent accross boots
+
+# User Account creation
 - From a sudo account, add a new user account: `sudo adduser <username>` and follow the prompts. Once created:
     - Run `sudo -u <username> xdg-user-dirs-update` to create the default directories for the new user.
     - `sudo -u <username> mkdir /home/<username>/.ssh`
@@ -155,23 +188,6 @@
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
     - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
     - `sudo usermod -aG docker <username>` to add the user to the docker group.
-- Login into the user account.
-- set the host uid on each user by adding export HOST_UID=$(id -u) to user acc .bashrc
-- git lfs install
-- setup ~/.vimrc and ~/.gitconfig as in `files/`
-    * cd $HOME && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.vimrc
-- set up your [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding)
-- make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
-    * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3.
-
-## building docker container
-- spot-base is the main docker image. scratch contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
-- docker build -t <image_name> . in the folder containing appropriate Dockerfile (say spot-base image)
-- docker compose up -d && docker attach spot-base in the folder containing appropriate docker-compose.yaml
-- add amrl credentials to spot launch file
-- docker start spot-base && docker attach spot-base whenever needed to re-enter the container
-- miniconda is also installed in the image. Use conda commands normal, but for creation, use conda-create instead of conda create (its a wrapper, it sets some torch paths properly)
-- for jetpack 5.1.2, for getting torch, only python 3.8 can be used
 
 # TODOs
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well
