@@ -10,21 +10,21 @@
 - set up X11 forwarding if you want the display to be forwarded to your local machine:
     * either add `ForwardX11 yes` and `ForwardX11Trusted yes` to your `~/.ssh/config` file for the entry for spot orin, or run ssh with `-X` and `-Y` flags
 - clone this repo `git clone --recursive --branch orin git@github.com:sadanand1120/spot-arch.git`
-- `cd spot-arch/docs/orin/files/spot-base`
-- `docker build -t spot-base:${USER} .` builds the docker image
-- `docker compose up -d && docker attach spot-base-${USER}` starts `spot-base-${USER}` container and attaches to it
+- `cd spot-arch/docs/orin/files/spot-ros1-jp5`
+- `docker build -t spot-ros1-jp5:${USER} .` builds the docker image
+- `docker compose up -d && docker attach spot-ros1-jp5-${USER}` starts `spot-ros1-jp5-${USER}` container and attaches to it
     * check [Notes](https://github.com/sadanand1120/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
-- `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to your start-clearpath.launch file (note: NOT the one ending in `.example`)
+- `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to `start_clearpath_spot.launch` (NOT the one ending in `.example`)
 - to start the default autonomy stack, run `roslaunch spot_autonomy start_all.launch`
 
 # Notes
 - orin is setup with jetpack 6.0.
-- [spot-base](files/spot-base/) is the main docker image. [scratch](files/scratch/) contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
-- the spot-base image has the following already set up:
+- [spot-ros1-jp5](files/spot-ros1-jp5/) is the main docker image. [spot-ros1-jp5-scratch](files/spot-ros1-jp5-scratch/) contains an equivalent setup where pytorch is built from source manually, instead of using images provided by nvidia (see `files/`)
+- the spot-ros1-jp5 image has the following already set up:
     * ROS1 (noetic)
     * pytorch (python as well as c++ libtorch), torchvision, opencv (Resources: [link1](https://forums.developer.nvidia.com/t/pytorch-for-jetson/72048) [link2](https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html))
     * git lfs
-    * miniconda (at `/opt/miniconda3`). Use `conda-create` instead of conda create (its a wrapper, it sets some torch paths properly if you want to use a different version of torch in your conda env)
+    * miniconda (at `/opt/miniconda3`). **Use `conda-create` instead of conda create** (its a wrapper, it sets some torch paths properly if you want to use a different version of torch in your conda env)
     * conda bash completion (so can use TAB for conda commands)
     * all essential AMRL repositories for standard navigation stack, cloned and built, under `~/catkin_ws` and `~/ut-amrl`
     * NOTE: repos are inside the container/image, you will not see it outside the container. Feel free to change the dockerfile and compose.yaml to modify the behaviour (e.g., mount a volume to the container for repos built outside)

@@ -188,6 +188,7 @@
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
     - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
     - `sudo usermod -aG docker <username>` to add the user to the docker group.
+- share spot entry and lab password with the user on UT stache
 
 # TODOs
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well

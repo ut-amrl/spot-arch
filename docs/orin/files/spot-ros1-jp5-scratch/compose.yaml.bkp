@@ -1,7 +1,7 @@
 services:
   spot_container:
-    image: scratch:latest
-    container_name: scratch
+    image: spot-ros1-jp5-scratch:latest
+    container_name: spot-ros1-jp5-scratch
     hostname: orin
     runtime: nvidia
     environment:				# add env vars, will override the ones defined in image
