@@ -143,7 +143,7 @@
         - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
 - add to /etc/bash.bashrc:
     ```
-    export HOST_UID=$(id -u)
+    export PULSE_SERVER=/run/user/1000/pulse/native
     
     # Function to prompt for confirmation before running risky docker remove commands
     docker() {

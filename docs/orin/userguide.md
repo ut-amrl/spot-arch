@@ -2,7 +2,11 @@
 - get added to AMRL VPN, AMRL github
 - get a user account on Spot orin
 
+**Note all docker images and containers of all users are stored in `/var/lib/docker`. Please use tag $USER as shown below for all your images and containers to avoid conflicts with other users' images/containers.**
+
 # Set up
+- run `echo "export HOST_UID=$(id -u)" >> ~/.bashrc`
+- run `echo "export XAUTHORITY=$HOME/.Xauthority" >> ~/.bashrc`
 - run `git lfs install`
 - setup your `~/.gitconfig` file like [this](files/.gitconfig). Change the name and email to your own.
     * `cd $HOME && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig`
@@ -29,7 +33,7 @@
     * all essential AMRL repositories for standard navigation stack, cloned and built, under `~/catkin_ws` and `~/ut-amrl`
     * NOTE: repos are inside the container/image, you will not see it outside the container. Feel free to change the dockerfile and compose.yaml to modify the behaviour (e.g., mount a volume to the container for repos built outside)
 - account password always defaults to lab password (shared on UT Stache), unless you change it
-- docker commands: **Note all docker images and containers of all users are stored in `/var/lib/docker`. Please use tags $USER for all your images and containers to avoid conflicts with other users' images/containers**
+- docker commands:
     * `ctrl+d` inside the container stops and exits it
     * use `docker ps` to check currently running containers
     * use `docker ps -a` to check all containers, including stopped ones

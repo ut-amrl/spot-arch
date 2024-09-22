@@ -11,6 +11,7 @@ All images have the following by default:
     * CUDA 11.4 (though GPU acceleration _NOT_ supported on jetpack 6 for jp5 containers)
     * ROS1 noetic
     * torch 2.1, libtorch, torchvision, opencv
+    * amrl spot autonomy stack auto-setup upon container creation from compose.yaml
 - spot-ros1-jp5-scratch **(legacy)**
     * ubuntu focal
     * jetpack 5.1.2
