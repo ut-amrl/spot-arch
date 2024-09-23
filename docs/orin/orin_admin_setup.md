@@ -46,7 +46,7 @@
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt update && sudo apt install wireguard wireguard-tools
 - sudo -i
-- cd /etc/wireguard
+- cd /etc/wireguard && wg genkey | tee wg-private.key | wg pubkey > wg-public.key && touch /etc/wireguard/wg0.conf
 - copy over wireguard files (wg0.conf and keys) here
 - wget https://go.dev/dl/go1.20.9.linux-arm64.tar.gz
 - sudo tar -C /usr/local -xzf go1.20.9.linux-arm64.tar.gz && rm go1.20.9.linux-arm64.tar.gz
