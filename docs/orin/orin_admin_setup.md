@@ -44,15 +44,16 @@
 ## wireguard
 (update: either do the following, or check out user-space wireguard-go installation https://github.com/WireGuard/wireguard-go) (update 2: on jetpack 6, kernel 5.15, modifying kernel config DID NOT work. So, had to use wireguard-go)
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
-- sudo apt update && sudo apt install wireguard wireguard-tools
+- sudo apt update && sudo apt install wireguard-tools
+- cd ~/.ssh && touch authorized_keys and then add your public key to the file
 - sudo -i
-- cd /etc/wireguard && wg genkey | tee wg-private.key | wg pubkey > wg-public.key && touch /etc/wireguard/wg0.conf
-- copy over wireguard files (wg0.conf and keys) here
+- cd /etc/wireguard && touch wg0.conf and paste the contents of the wireguard config file
 - wget https://go.dev/dl/go1.20.9.linux-arm64.tar.gz
 - sudo tar -C /usr/local -xzf go1.20.9.linux-arm64.tar.gz && rm go1.20.9.linux-arm64.tar.gz
 - export PATH=$PATH:/usr/local/go/bin && go version
 - export PATH=$PATH:/usr/bin && git --version
 - git clone https://git.zx2c4.com/wireguard-go && cd wireguard-go && make -j$(nproc)
+- cd /etc/wireguard/wireguard-go && ./wireguard-go wg0 && sudo ip address add dev wg0 10.1.0.3/32 && sudo wg setconf wg0 /etc/wireguard/wg0.conf && sudo ip link set up dev wg0 && sudo ip route add 10.0.0.0/24 dev wg0 && sudo ip route add 10.1.0.0/16 dev wg0 && sudo ip route add 10.2.0.0/16 dev wg0 && sudo ip route add 10.3.0.0/16 dev wg0
 - sudo vi /etc/systemd/system/wireguard-setup.service:
     ```
     [Unit]
