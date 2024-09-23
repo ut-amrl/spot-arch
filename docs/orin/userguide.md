@@ -44,3 +44,4 @@
     * use `docker rm <container>` to remove a stopped container
     * use `docker rmi <image>` to remove an image
 - highly recommended to use docker for all projects, and to not do development on native host
+- IMPORTANT: if you have to reboot orin, you need to unplug all peripherals from the orin ports (except usb-c power and displayport). Replug once it boots up.
