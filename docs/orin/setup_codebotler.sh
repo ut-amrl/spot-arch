@@ -26,11 +26,30 @@ git clone --recursive --branch spot2 git@github.com:ut-amrl/codebotler_amrl_impl
 
 # Initialize conda in the script
 eval "$(/opt/miniconda3/bin/conda shell.bash hook)"
+conda_create_hook() {
+    # Create the conda environment
+    conda create "$@"
+    
+    # Extract the environment name from the arguments (assumes --name or -n is used)
+    env_name=""
+    for i in "$@"; do
+        if [[ $i == "--name" || $i == "-n" ]]; then
+            shift
+            env_name="$1"
+            break
+        fi
+        shift
+    done
+    
+    conda activate "$env_name"
+    bash ~/.conda/hooks/post-create.sh
+    conda deactivate
+}
 
 echo -e "${RED}Setting up codebotler conda environment...${NC}"
 # codebotler env setup
 cd ~/ut-amrl/codebotler/codebotler
-conda-create -n codebotler python=3.8 -y
+conda_create_hook -n codebotler python=3.8 -y
 conda activate codebotler
 wget -O torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl https://developer.download.nvidia.cn/compute/redist/jp/v512/pytorch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
 pip3 install 'Cython<3'
