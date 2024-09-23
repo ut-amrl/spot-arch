@@ -7,6 +7,8 @@ prereqs:
 """
 
 #!/bin/sh
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
 # Add to current shell
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/codebotler/codebotler
@@ -16,19 +18,21 @@ export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/codebotler/codebotler_am
 echo 'export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/codebotler/codebotler' >> ~/.bashrc
 echo 'export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/codebotler/codebotler_amrl_impl' >> ~/.bashrc
 
+echo -e "${RED}Cloning codebotler repos...${NC}"
 cd ~/ut-amrl
 mkdir -p codebotler && cd codebotler
 git clone --recursive --branch spot git@github.com:ut-amrl/codebotler.git
 git clone --recursive --branch spot2 git@github.com:ut-amrl/codebotler_amrl_impl.git
 
 # Initialize conda in the script
-eval "$(${CONDA_ROOT}/bin/conda shell.bash hook)"
+eval "$(/opt/miniconda3/bin/conda shell.bash hook)"
 
+echo -e "${RED}Setting up codebotler conda environment...${NC}"
 # codebotler env setup
 cd ~/ut-amrl/codebotler/codebotler
 conda-create -n codebotler python=3.8 -y
 conda activate codebotler
-wget https://developer.download.nvidia.cn/compute/redist/jp/v512/pytorch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+wget -O torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl https://developer.download.nvidia.cn/compute/redist/jp/v512/pytorch/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
 pip3 install 'Cython<3'
 pip3 install numpy torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
 pip3 install scipy
@@ -44,6 +48,7 @@ cd ~
 rm -rf torchvision
 python3 -c "import torchvision; print(torchvision.__version__)"
 
+echo -e "${RED}Setting up codebotler dependencies...${NC}"
 cd ~/ut-amrl/codebotler/codebotler
 pip3 install -r requirements.txt
 

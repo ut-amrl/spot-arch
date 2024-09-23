@@ -215,7 +215,7 @@ COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 #    udevadm control --reload-rules && udevadm trigger
 
 # Install Miniconda to /opt/miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+RUN wget -O Miniconda3-py310_24.7.1-0-Linux-aarch64.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
     bash Miniconda3-py310_24.7.1-0-Linux-aarch64.sh -b -p /opt/miniconda3 && \
     rm Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
     /opt/miniconda3/bin/conda config --set auto_activate_base false

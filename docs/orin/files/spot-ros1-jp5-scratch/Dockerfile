@@ -100,7 +100,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /root
 RUN mkdir -p cmake-3.25.1/Src
 WORKDIR /root/cmake-3.25.1/Src
-RUN wget -c --show-progress https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1.tar.gz \
+RUN wget -O cmake-3.25.1.tar.gz -c --show-progress https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1.tar.gz \
     && tar xvf cmake-3.25.1.tar.gz
 WORKDIR /root/cmake-3.25.1
 
