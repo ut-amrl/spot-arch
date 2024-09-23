@@ -13,6 +13,7 @@
 - other useful resources:
     - https://docs.nvidia.com/jetson/jetpack/introduction/index.html
     - https://docs.nvidia.com/sdk-manager/install-with-sdkm-jetson/index.html
+- if emmc and nvme both have os installed, you might need to adjust the boot order following the section 2 in this link [link](https://www.linuxbabe.com/command-line/how-to-use-linux-efibootmgr-examples)
 
 # Post-setup
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
@@ -68,7 +69,7 @@
     [Install]
     WantedBy=multi-user.target
     ```
-- sudo systemctl daemon-reload && sudo systemctl start wireguard-setup.service && sudo systemctl enable wireguard-setup.service
+- sudo wg-quick down wg0 && sudo systemctl daemon-reload && sudo systemctl start wireguard-setup.service && sudo systemctl enable wireguard-setup.service
 - (To stop wireguard completely: sudo wg-quick down wg0 && sudo systemctl stop wireguard-setup.service && sudo systemctl disable wireguard-setup.service)
 - (NOTE: you MIGHT need to do the last daemon reload and start service commands again once in a while, if the wireguard connection is lost for some reason)
 
@@ -76,7 +77,9 @@
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt install netplan.io
 - copy over netplan config files (permissions 600) and place in /etc/netplan
+    * sudo -i and then cd /etc/netplan && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/config/netplan/01-network-manager-all.yaml && wget https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/config/netplan/02-spotgxp-and-velodyne.yaml && chmod 600 *.yaml
     * have to connect actual devices (one by one) and do ip a to get the eth connection names, modify the netplan config files accordingly
+- sudo systemctl disable systemd-networkd-wait-online.service && sudo systemctl mask systemd-networkd-wait-online.service
 - sudo systemctl start systemd-networkd && sudo systemctl enable systemd-networkd && sudo netplan apply
 
 ## docker install
@@ -100,14 +103,15 @@
 
 ## nvidia container toolkit setup with docker [link](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
-- curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
-  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-- sudo apt-get update && sudo apt-get install nvidia-container-toolkit
-    - you might need to do sudo apt --fix-broken install
-    - re run sudo apt-get install -y nvidia-container-toolkit
-- sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
+- run nvidia-ctk --version, if not installed:
+    - curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+    && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+        sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+        sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    - sudo apt-get update && sudo apt-get install nvidia-container-toolkit
+        - you might need to do sudo apt --fix-broken install
+        - re run sudo apt-get install -y nvidia-container-toolkit
+    - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo nvidia-ctk runtime configure --runtime=docker
 - sudo systemctl restart docker
 
@@ -129,7 +133,7 @@
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
-- to remove a possible ssh lag after boot up (`System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)`):
+- **(DEPRECATED)** to remove a possible ssh lag after boot up (`System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)`):
     - try:
         - sudo systemctl stop systemd-networkd-wait-online.service && sudo systemctl disable systemd-networkd-wait-online.service
     - else:
