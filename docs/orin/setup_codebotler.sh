@@ -1,10 +1,10 @@
-"""
+: ' # multiline comment
 setup script for running codebotler on AMRL Spot AGX orin (jetpack 6.0)
 prereqs:
 - spot_autonomy stack setup complete
 - conda installed
 - inside a jetpack 5.1.2 container (CUDA acceleration will not be available)
-"""
+'
 
 #!/bin/sh
 RED='\033[0;31m'
