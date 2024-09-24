@@ -9,15 +9,15 @@
 - run `echo "export XAUTHORITY=$HOME/.Xauthority" >> ~/.bashrc`
 - run `git lfs install`
 - setup your `~/.gitconfig` file like [this](files/.gitconfig). Change the name and email to your own.
-    * `cd $HOME && wget -O .gitconfig https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig`
+    * `cd $HOME && wget -O .gitconfig https://raw.githubusercontent.com/ut-amrl/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig`
 - set up [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding) on your local machine, used for sshing into spot user account
 - set up X11 forwarding if you want the display to be forwarded to your local machine:
     * either add `ForwardX11 yes` and `ForwardX11Trusted yes` to your `~/.ssh/config` file for the entry for spot orin, or run ssh with `-X` and `-Y` flags
-- clone this repo `git clone --recursive --branch orin git@github.com:sadanand1120/spot-arch.git`
+- clone this repo `git clone --recursive --branch orin git@github.com:ut-amrl/spot-arch.git`
 - `cd spot-arch/docs/orin/files/spot-ros1-jp5`
 - `docker build -t spot-ros1-jp5:${USER} .` builds the docker image
 - `docker compose up -d && docker attach spot-ros1-jp5-${USER}` starts `spot-ros1-jp5-${USER}` container and attaches to it
-    * check [Notes](https://github.com/sadanand1120/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
+    * check [Notes](https://github.com/ut-amrl/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
 - `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to `start_clearpath_spot.launch` (NOT the one ending in `.example`)
 - to start the default autonomy stack, run `roslaunch spot_autonomy start_all.launch`
 

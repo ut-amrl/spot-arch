@@ -6,7 +6,11 @@ prereqs:
 - inside a jetpack 5.1.2 container (CUDA acceleration will not be available)
 '
 
-#!/bin/sh
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
