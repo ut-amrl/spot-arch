@@ -7,7 +7,7 @@ services:
     environment:
       # add env vars, will override the ones defined in image
       - DISPLAY=${DISPLAY} # X display forwarded
-      - PULSE_SERVER=unix:/run/user/0/pulse/native # audio forwarding
+      - PULSE_SERVER=/run/user/0/pulse/native # audio forwarding
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       - ROS_MASTER_URI=http://10.1.0.3:11311
@@ -20,6 +20,7 @@ services:
       - /dev/dri:/dev/dri:ro # Read-only access to graphics card for gpu rendering
       - /etc/alsa:/etc/alsa:ro # audio forwarding from host
       - /usr/share/alsa:/usr/share/alsa:ro
+      - /usr/lib/aarch64-linux-gnu/alsa-lib:/usr/lib/aarch64-linux-gnu/alsa-lib:ro
       - /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:ro # default container uid is 0 as user root
       - ${HOME}/.gitconfig:/root/.gitconfig:rw
       #- ${SSH_AUTH_SOCK}:/ssh-agent   # Mount the host SSH agent socket into the container

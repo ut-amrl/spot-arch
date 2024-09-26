@@ -77,7 +77,7 @@
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt install netplan.io
 - copy over netplan config files (permissions 600) and place in /etc/netplan
-    * sudo -i and then cd /etc/netplan && wget -O 01-network-manager-all.yaml https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/config/netplan/01-network-manager-all.yaml && wget -O 02-spotgxp-and-velodyne.yaml https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/config/netplan/02-spotgxp-and-velodyne.yaml && chmod 600 *.yaml
+    * sudo -i and then cd /etc/netplan && wget -O 01-network-manager-all.yaml https://raw.githubusercontent.com/ut-amrl/spot-arch/refs/heads/orin/docs/orin/config/netplan/01-network-manager-all.yaml && wget -O 02-spotgxp-and-velodyne.yaml https://raw.githubusercontent.com/ut-amrl/spot-arch/refs/heads/orin/docs/orin/config/netplan/02-spotgxp-and-velodyne.yaml && chmod 600 *.yaml
     * have to connect actual devices (one by one) and do ip a to get the eth connection names, modify the netplan config files accordingly
 - sudo systemctl disable systemd-networkd-wait-online.service && sudo systemctl mask systemd-networkd-wait-online.service
 - sudo systemctl start systemd-networkd && sudo systemctl enable systemd-networkd && sudo netplan apply
@@ -124,7 +124,7 @@
         HandleLidSwitchDocked=ignore
         ```
     - `sudo systemctl restart systemd-logind`
-    - `cd ~ && wget -O disable-blank-screen.sh https://raw.githubusercontent.com/sadanand1120/spot-arch/refs/heads/orin/docs/orin/files/disable-blank-screen.sh && chmod +x disable-blank-screen.sh && sudo mv disable-blank-screen.sh /etc/profile.d/`
+    - `cd ~ && wget -O disable-blank-screen.sh https://raw.githubusercontent.com/ut-amrl/spot-arch/refs/heads/orin/docs/orin/files/disable-blank-screen.sh && chmod +x disable-blank-screen.sh && sudo mv disable-blank-screen.sh /etc/profile.d/`
 - To be able to set user quotas:
     - sudo apt update && sudo apt install quota
     - `sudo vi /etc/fstab` and add `usrquota` to the root partition
