@@ -18,7 +18,7 @@
 # Post-setup
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 - sudo apt install python3-pip firefox
-- sudo pip3 install -U jetson-stats
+- sudo pip3 install --no-cache-dir -v -U jetson-stats
 - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
 
 ## basic packages
@@ -147,9 +147,7 @@
             ```
         - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
 - add to /etc/bash.bashrc:
-    ```
-    export PULSE_SERVER=/run/user/1000/pulse/native
-    
+    ```    
     # Function to prompt for confirmation before running risky docker remove commands
     docker() {
         # List of docker commands that should trigger the prompt
@@ -193,6 +191,7 @@
     - Give sudo permissions to the user if needed: `sudo usermod -aG sudo <username>`.
     - `sudo chown <username>:<username> /home/<username>/.ssh && sudo chown <username>:<username> /home/<username>/.ssh/*`
     - `sudo usermod -aG docker <username>` to add the user to the docker group.
+    - `sudo usermod -aG jtop <username>`
 - share spot entry and lab password with the user on UT stache
 
 # TODOs

@@ -26,6 +26,9 @@ Now the process is as always:
 # Set up
 - run `echo "export HOST_UID=$(id -u)" >> ~/.bashrc`
 - run `echo "export XAUTHORITY=$HOME/.Xauthority" >> ~/.bashrc`
+- run `source ~/.bashrc`
+- run `echo "export PULSE_SERVER=/run/user/$HOST_UID/pulse/native" >> ~/.bashrc`
+- run `source ~/.bashrc`
 - run `git lfs install`
 - setup your `~/.gitconfig` file like [this](files/.gitconfig). Change the name and email to your own.
     * `cd $HOME && wget -O .gitconfig https://raw.githubusercontent.com/ut-amrl/spot-arch/refs/heads/orin/docs/orin/files/.gitconfig`
