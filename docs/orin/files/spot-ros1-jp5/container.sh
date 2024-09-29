@@ -1,3 +1,4 @@
+# Usage: ./container.sh [--name CONTAINER_NAME] [--flag1=bla1 --flag2=bla2 ...] [IMAGE_NAME]
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
@@ -32,9 +33,13 @@ done
 
 # If no image name is provided, use the default image name
 IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
+echo "Using image: $IMAGE_NAME"
 
 # If no --name flag is provided, use a default container name
-CONTAINER_NAME=${CONTAINER_NAME:-"spot-container-${USER}"}
+CONTAINER_NAME=${CONTAINER_NAME:-$DEFAULT_CONTAINER_NAME}
+echo "Using container name: $CONTAINER_NAME"
+
+echo "Additional flags: $FLAGS"
 
 # Run the Docker container with the provided or default image name and flags
 docker run -it \
@@ -45,8 +50,8 @@ docker run -it \
     --ipc host \
     --workdir /root \
     --group-add dialout \
-    --privileged true \
-    -e PULSE_SERVER=/run/user/0/pulse/native \
+    --privileged \
+    -e PULSE_SERVER=unix:/run/user/0/pulse/native \
     -e NVIDIA_VISIBLE_DEVICES=all \
     -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
     -e ROS_MASTER_URI=http://10.1.0.3:11311 \
@@ -55,10 +60,9 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     -v ${HOME}/.Xauthority:/root/.Xauthority:rw \
     -v /dev/dri:/dev/dri:ro \
-    -v /etc/alsa:/etc/alsa:ro \
-    -v /usr/share/alsa:/usr/share/alsa:ro \
-    -v /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:ro \
+    -v /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:rw \
     -v ${HOME}/.gitconfig:/root/.gitconfig:rw \
     -v /tmp:/tmp \
+    -u 0:0 \
     $FLAGS \
     $IMAGE_NAME

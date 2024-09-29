@@ -133,19 +133,6 @@
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
-- **(DEPRECATED)** to remove a possible ssh lag after boot up (`System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)`):
-    - try:
-        - sudo systemctl stop systemd-networkd-wait-online.service && sudo systemctl disable systemd-networkd-wait-online.service
-    - else:
-        - sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
-        - sudo systemctl edit systemd-networkd-wait-online.service
-        - add the following near the top at the designated place:
-            ```
-            [Service]
-            ExecStart=
-            ExecStart=/usr/bin/true
-            ```
-        - sudo systemctl daemon-reload && sudo systemctl start systemd-networkd-wait-online.service && sudo systemctl enable systemd-networkd-wait-online.service
 - add to /etc/bash.bashrc:
     ```    
     # Function to prompt for confirmation before running risky docker remove commands

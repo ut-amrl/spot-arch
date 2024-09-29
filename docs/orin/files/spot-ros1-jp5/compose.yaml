@@ -39,7 +39,7 @@ services:
 # [DONE] 1. dynamically update DISPLAY in docker, not stuck at the time of container creation
 #   - run who to check logged in user's display number
 #   - run xhost + to allow docker to access the display
-# 2. WHY unable to create multiple docker containers simultaneously??
 # 3. audio issues https://comp0016-team-24.github.io/dev/problem-solving/2020/10/30/passing-audio-into-docker.html
-# 4. docker run flags for ldos: --cpus=1.0   --memory=2g
-#   - docker update --memory "2g" --memory-swap "3g" --cpuset-cpus "0" ldos1
+#   - apt-get update && apt-get install -y pulseaudio alsa-utils
+# 4. docker run flags for ldos: --cpuset-cpus "0-3" --memory 8g --memory-swap 8g
+#   - docker update --cpuset-cpus "0" --memory 2g --memory-swap 2g ldos1
