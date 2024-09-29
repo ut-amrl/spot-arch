@@ -6,6 +6,8 @@ if [ -n "$(find /tmp -type s -name 'agent.*' 2>/dev/null)" ]; then
   export SSH_AUTH_SOCK=$(find /tmp -type s -name 'agent.*' 2>/dev/null)
 fi
 
+export DISPLAY=$(cat /tmp/.display_env_$HOST_UID)
+
 # Check if the initialization has already been done (using a marker file)
 if [ ! -f /initialized ]; then
 	echo "Running one-time setup for essential repos..."

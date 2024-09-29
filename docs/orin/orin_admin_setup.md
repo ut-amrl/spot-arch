@@ -174,10 +174,28 @@
             command docker "$@"
         fi
     }
+
+    # CUDA
+    export CUDA_HOME=/usr/local/cuda
+    export PATH=$PATH:$CUDA_HOME/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/lib64
+
     ```
 - make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
     * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3
     * sudo jetson_clocks is not persistent accross boots
+- sudo vi /etc/systemd/system/xhostplus.service and add the following (needed for docker):
+    ```
+    [Unit]
+    Description=Allow local X server connections
+
+    [Service]
+    ExecStart=/usr/bin/xhost +
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+    - sudo systemctl enable xhostplus.service && sudo systemctl start xhostplus.service
 
 # User Account creation
 - From a sudo account, add a new user account: `sudo adduser <username>` and follow the prompts. Once created:
