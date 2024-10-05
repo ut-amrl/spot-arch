@@ -54,8 +54,6 @@ docker run -it \
     -e PULSE_SERVER=unix:/run/user/0/pulse/native \
     -e NVIDIA_VISIBLE_DEVICES=all \
     -e NVIDIA_DRIVER_CAPABILITIES=compute,utility \
-    # -e ROS_MASTER_URI=http://10.1.0.3:11311 \
-    # -e ROS_IP=10.1.0.3 \
     -e HOST_UID=${HOST_UID} \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     -v ${HOME}/.Xauthority:/root/.Xauthority:rw \

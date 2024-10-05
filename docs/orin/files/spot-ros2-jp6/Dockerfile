@@ -43,7 +43,7 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" > /etc/apt/sources.list.d/ros2.list
 
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ros-humble-desktop
+RUN apt-get install -y ros-humble-desktop-full
 RUN apt-get install -y ros-dev-tools
 
 # SHELL ["/bin/bash", "-c"]
@@ -166,7 +166,6 @@ RUN apt-get update && apt-get install -y \
     python3-rosinstall \
     python3-rosinstall-generator \
     python3-vcstool \
-    ros-humble-ros-numpy \
     ros-humble-twist-mux \
     ros-humble-interactive-marker-twist-server \
     ros-humble-velodyne-pointcloud \
@@ -174,7 +173,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install specific protobuf version and Bosdyn packages for spot_ros
 RUN pip3 install protobuf==3.20.1 && \
-    pip3 install cython empy bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1 virtualenv jetson-stats rospkg \
+    pip3 install cython empy bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1 virtualenv jetson-stats rospkg ros2-numpy \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies for graph_navigation
@@ -211,10 +210,31 @@ RUN apt-get update && apt-get install -y \
     libgflags-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Microsoft repository and install Kinect SDK
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-    apt-add-repository "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main" && \
-    apt-get update && ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev
+# # Add Microsoft repository and install Kinect SDK
+# RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+#     apt-add-repository "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main" && \
+#     apt-get update && ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev
+
+# Switch to Ubuntu 20.04 (Focal) sources temporarily for libsoundio1 installation
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.backup && \
+    sed -i 's/jammy/focal/g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y libsoundio1
+
+RUN wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.2_arm64.deb && \
+    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.2_arm64.deb && \
+    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/k/k4a-tools/k4a-tools_1.4.2_arm64.deb
+
+
+RUN echo 'libk4a1.4 libk4a1.4/accepted-eula-hash string 0f5d5c5de396e4fee4c0753a21fee0c1ed726cf0316204edda484f08cb266d76' | debconf-set-selections && \
+    echo 'libk4a1.4 libk4a1.4/accept-eula boolean true' | debconf-set-selections && \
+    dpkg -i libk4a1.4_1.4.2_arm64.deb && \
+    dpkg -i libk4a1.4-dev_1.4.2_arm64.deb && \
+    dpkg -i k4a-tools_1.4.2_arm64.deb
+
+# Restore the original sources list for Ubuntu 22.04 (Jammy)
+RUN mv /etc/apt/sources.list.backup /etc/apt/sources.list && \
+    apt-get update
 
 # Add Kinect udev rules
 COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
