@@ -86,10 +86,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libavcodec-dev \
     libavformat-dev \
     libswscale-dev \
+    libqt5websockets5-dev \
+    qtcreator \
+    qtbase5-dev \
+    qt5-qmake \
+    qtchooser \
+    qtbase5-dev-tools \
     cmake \
     libssl-dev \
     curl \
-    qt5-default \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
@@ -188,7 +193,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install dependencies for webviz and robofleet_client
 RUN apt-get update && apt-get install -y \
-    cmake qt5-default libqt5websockets5-dev \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies for k4a_ros
@@ -202,8 +207,6 @@ RUN apt-get update && apt-get install -y \
 
 # Install dependencies for spot_autonomy
 RUN apt-get update && apt-get install -y \
-    qt5-default \
-    libqt5websockets5-dev \
     libgoogle-glog-dev \
     libgflags-dev \
     && rm -rf /var/lib/apt/lists/*
