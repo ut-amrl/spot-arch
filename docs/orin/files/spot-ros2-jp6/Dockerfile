@@ -169,6 +169,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-twist-mux \
     ros-humble-interactive-marker-twist-server \
     ros-humble-velodyne-pointcloud \
+    ros-humble-nav2-costmap-2d \
     && rm -rf /var/lib/apt/lists/*
 
 # Install specific protobuf version and Bosdyn packages for spot_ros

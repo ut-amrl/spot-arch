@@ -160,6 +160,7 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-twist-mux \
     ros-noetic-interactive-marker-twist-server \
     ros-noetic-velodyne-pointcloud \
+    ros-noetic-costmap-2d \
     && rm -rf /var/lib/apt/lists/*
 
 # Install specific protobuf version and Bosdyn packages for spot_ros
