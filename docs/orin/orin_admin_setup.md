@@ -133,6 +133,7 @@
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
+    - `sudo touch /var/tmp/docker_command_log.txt && sudo chmod 666 /var/tmp/docker_command_log.txt`
 - add to /etc/bash.bashrc:
     ```    
     # Function to prompt for confirmation before running risky docker remove commands
@@ -151,6 +152,11 @@
             read -r confirmation
 
             if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
+                # Log the command, username, and timestamp to a log file
+                log_file="/var/tmp/docker_command_log.txt"
+                timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+                username=$(whoami)
+                echo "[$timestamp] User: $username executed: docker $*" >> "$log_file"
                 # If confirmed, run the original docker command
                 command docker "$@"
             else
