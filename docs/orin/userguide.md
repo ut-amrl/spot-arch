@@ -40,7 +40,7 @@ Now the process is as always:
 - clone this repo `git clone --recursive --branch orin git@github.com:ut-amrl/spot-arch.git`
 - `cd spot-arch/docs/orin/files/spot-ros1-jp5`
 - `docker build -t spot-ros1-jp5:${USER} .` builds the docker image
-- `docker compose up -d && docker attach spot-ros1-jp5-${USER}` starts `spot-ros1-jp5-${USER}` container and attaches to it
+- `./container.sh` starts `spot-ros1-jp5-${USER}` container and attaches to it. Check the `container.sh` script for more info.
     * check [Notes](https://github.com/ut-amrl/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
 - `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to `start_clearpath_spot.launch` (NOT the one ending in `.example`)
 - to start the default autonomy stack, run `roslaunch spot_autonomy start_all.launch`

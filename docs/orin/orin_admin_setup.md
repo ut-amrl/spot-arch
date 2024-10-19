@@ -48,14 +48,15 @@
 - sudo apt update && sudo apt install wireguard-tools
 - cd ~/.ssh && touch authorized_keys and then add your public key to the file
 - sudo -i
-- cd /etc/wireguard && touch wg0.conf and paste the contents of the wireguard config file
+- cd /etc/wireguard && wg genkey | tee wg-private.key | wg pubkey > wg-public.key && touch wg0.conf and paste the contents of the wireguard config file (see config folder) and modify the keys accordingly
 - wget -O go1.20.9.linux-arm64.tar.gz https://go.dev/dl/go1.20.9.linux-arm64.tar.gz
 - sudo tar -C /usr/local -xzf go1.20.9.linux-arm64.tar.gz && rm go1.20.9.linux-arm64.tar.gz
 - export PATH=$PATH:/usr/local/go/bin && go version
 - export PATH=$PATH:/usr/bin && git --version
 - git clone https://git.zx2c4.com/wireguard-go && cd wireguard-go && make -j$(nproc)
+- NOTE: modify 10.1.0.3 to your assigned IP below and in the service file
 - cd /etc/wireguard/wireguard-go && ./wireguard-go wg0 && sudo ip address add dev wg0 10.1.0.3/32 && sudo wg setconf wg0 /etc/wireguard/wg0.conf && sudo ip link set up dev wg0 && sudo ip route add 10.0.0.0/24 dev wg0 && sudo ip route add 10.1.0.0/16 dev wg0 && sudo ip route add 10.2.0.0/16 dev wg0 && sudo ip route add 10.3.0.0/16 dev wg0
-- sudo vi /etc/systemd/system/wireguard-setup.service:
+- sudo vi /etc/systemd/system/wireguard-setup.service
     ```
     [Unit]
     Description=Custom WireGuard Setup based on wireguard-go
@@ -82,7 +83,7 @@
 - sudo systemctl disable systemd-networkd-wait-online.service && sudo systemctl mask systemd-networkd-wait-online.service
 - sudo systemctl start systemd-networkd && sudo systemctl enable systemd-networkd && sudo netplan apply
 
-## docker install
+## docker install (rootful)
 - first do a clean uninstall:
     - docker system prune -a --volumes; sudo systemctl disable --now docker.service docker.socket; sudo rm /var/run/docker.sock; dockerd-rootless-setuptool.sh uninstall; /usr/bin/rootlesskit rm -rf ~/.local/share/docker
     - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
@@ -134,7 +135,7 @@
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
     - `sudo touch /var/tmp/docker_command_log.txt && sudo chmod 666 /var/tmp/docker_command_log.txt`
-- add to /etc/bash.bashrc:
+- add to /etc/bash.bashrc: (TODO: log in docker file user who created something and then disallow others from removing anyone else's stuff)
     ```    
     # Function to prompt for confirmation before running risky docker remove commands
     docker() {
@@ -241,3 +242,59 @@ volumes:
     - /opt/nvidia/vpi:/opt/nvidia/vpi
 ```
 * deleting a user including all files etc: `sudo userdel -r <username>`
+
+# [did not work] rootless docker efforts
+## docker install (rootless)
+- first do a clean uninstall:
+    - docker system prune -a --volumes; sudo systemctl disable --now docker.service docker.socket; sudo rm /var/run/docker.sock; dockerd-rootless-setuptool.sh uninstall; /usr/bin/rootlesskit rm -rf ~/.local/share/docker
+    - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
+    - sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+    - sudo rm -rf /var/lib/docker && sudo rm -rf /var/lib/containerd && sudo rm -rf /etc/docker && rm -rf ~/.config/docker
+    - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
+- sudo apt-get update && sudo apt-get install ca-certificates curl
+- sudo install -m 0755 -d /etc/apt/keyrings
+- sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+- sudo chmod a+r /etc/apt/keyrings/docker.asc
+- echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+- sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+- sudo apt-get install -y dbus-user-session && sudo apt-get install -y uidmap
+- sudo reboot
+- sudo systemctl disable --now docker.service docker.socket && sudo rm /var/run/docker.sock
+- sudo reboot
+- dockerd-rootless-setuptool.sh install
+    * [INFO] To control docker.service, run: `systemctl --user (start|stop|restart) docker.service`
+- systemctl --user start docker && systemctl --user enable docker && sudo loginctl enable-linger $(whoami)
+- sudo loginctl enable-linger amrl_user
+
+
+
+- echo "export PATH=/usr/bin:$PATH" >> ~/.bashrc && echo "export DOCKER_HOST=unix:///run/user/1000/docker.sock" >> ~/.bashrc
+- sudo -i
+- mkdir -p /etc/systemd/system/user@.service.d && vi /etc/systemd/system/user@.service.d/delegate.conf
+    ```
+    [Service]
+    Delegate=cpu cpuset io memory pids
+    ```
+- systemctl daemon-reload
+- echo "net.ipv4.ping_group_range = 0 2147483647" >> /etc/sysctl.conf && echo "net.ipv4.ip_unprivileged_port_start = 0" >> /etc/sysctl.conf && echo "net.bridge.bridge-nf-call-iptables = 1" >> /etc/sysctl.conf && echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.conf
+- sysctl -p /etc/sysctl.conf. See if you get any errors. If you do run:
+    * modprobe bridge && modprobe br_netfilter
+- sudo sysctl --system
+- systemctl --user daemon-reload && systemctl --user restart docker.service
+
+
+- run docker in rootless mode like in robolidar (`docker info | grep -i root`, note robolidar has podman, not docker):
+    * https://collabnix.com/how-to-run-docker-in-a-rootless-mode/
+
+## podman setup (rootless by default)
+- sudo apt-get update && sudo apt-get -y install podman
+- podman --version
+- sudo ln -s $(which podman) /usr/bin/docker && docker --version
+- for podman ([ref1](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html) [ref2](https://forums.developer.nvidia.com/t/podman-gpu-on-jetson-agx-orin/297734/9))
+    - sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml --mode=csv
+     --device-name-strategy=type-index
+    - nvidia-ctk cdi list, to see available options (e.g., `nvidia.com/gpu=0` and `nvidia.com/gpu=all`)
+    - sudo nvidia-ctk config --in-place --set nvidia-container-runtime.mode=cdi
