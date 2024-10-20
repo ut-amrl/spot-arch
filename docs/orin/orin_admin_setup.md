@@ -152,8 +152,10 @@
 
             # List of risky keywords to detect in the entire command
             risky_keywords=("rm" "rmi" "prune" "destroy" "die" "kill" "pause" "rename" "restart" "stop" "delete" "untag" "remove" "disable" "unmount" "disconnect" "reload")
+            spam_keywords=("ps" "version" "info")
             # Combine risky keywords into a regex pattern that matches whole words
             risky_pattern="\\b($(IFS='|'; echo "${risky_keywords[*]}"))\\b"
+            spam_pattern="\\b($(IFS='|'; echo "${spam_keywords[*]}"))\\b"
 
             # Log file path
             log_file="/var/log/docker_logs/docker_command_log.txt"
@@ -178,8 +180,12 @@
                 fi
             fi
 
+            # dont log spam commands as they dont trigger any important event
+            if ! [[ "$*" =~ $spam_pattern ]]; then
+                echo "[$timestamp] User: $username | Command: docker $* | Found as: not risky" >> "$log_file"
+            fi
+
             # If not risky, run the command directly
-            echo "[$timestamp] User: $username | Command: docker $* | Found as: not risky" >> "$log_file"
             command docker "$@"
         }
 
