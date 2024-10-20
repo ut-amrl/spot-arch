@@ -134,47 +134,112 @@
     - `sudo quotacheck -cugm /` to initialize the quota files
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
-    - `sudo touch /var/tmp/docker_command_log.txt && sudo chmod 666 /var/tmp/docker_command_log.txt`
-- add to /etc/bash.bashrc: (TODO: log in docker file user who created something and then disallow others from removing anyone else's stuff)
-    ```    
-    # Function to prompt for confirmation before running risky docker remove commands
-    docker() {
-        # List of docker commands that should trigger the prompt
-        risky_commands=("rm" "rmi" "prune")
+- Log everything for docker:
+    - sudo mkdir /var/tmp/docker_logs && sudo chmod 777 /var/tmp/docker_logs
+    - sudo touch /var/tmp/docker_logs/docker_command_log.txt /var/tmp/docker_logs/docker_events_log.txt && sudo chmod 666 /var/tmp/docker_logs/docker_command_log.txt /var/tmp/docker_logs/docker_events_log.txt
+    - sudo vi /etc/bash.bashrc
+        ```bash
+        # CUDA
+        export CUDA_HOME=/usr/local/cuda
+        export PATH=$PATH:$CUDA_HOME/bin
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/lib64
 
-        # Check if the first/second argument is in the list of risky commands
-        if [[ " ${risky_commands[@]} " =~ " $1 " || " ${risky_commands[@]} " =~ " $2 " ]]; then
+        # Function to log all docker commands and prompt for risky ones
+        docker() {
             # Red color output
             RED='\033[0;31m'
-            # No color (reset)
-            NC='\033[0m'
+            NC='\033[0m'  # No color
 
-            echo -e "${RED}Are you sure you want to do this? Make sure you do NOT remove other users' containers/images. (y/n)${NC}"
-            read -r confirmation
+            # List of risky keywords to detect in the entire command
+            risky_keywords=("rm" "rmi" "prune" "destroy" "die" "kill" "pause" "rename" "restart" "stop" "delete" "untag" "remove" "disable" "unmount" "disconnect" "reload")
 
-            if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
-                # Log the command, username, and timestamp to a log file
-                log_file="/var/tmp/docker_command_log.txt"
-                timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-                username=$(whoami)
-                echo "[$timestamp] User: $username executed: docker $*" >> "$log_file"
-                # If confirmed, run the original docker command
-                command docker "$@"
-            else
-                echo "Aborted."
-            fi
-        else
-            # For all other docker commands, run normally
+            # Log file path
+            log_file="/var/tmp/docker_logs/docker_command_log.txt"
+            timestamp=$(date '+%Y-%m-%d %H:%M:%S.%N')
+            username=$(whoami)
+
+            # Check if any risky keyword appears in the entire command
+            for keyword in "${risky_keywords[@]}"; do
+                if [[ "$*" == *"$keyword"* ]]; then
+                    echo -e "${RED}Are you sure you want to do this? Make sure you do NOT affect other users' objects. (y/n)${NC}"
+                    read -r confirmation
+
+                    if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
+                        # Run the original docker command
+                        echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $keyword:proceeded" >> "$log_file"
+                        command docker "$@"
+                        return
+                    else
+                        echo "Aborted."
+                        echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $keyword:aborted" >> "$log_file"
+                        return 1
+                    fi
+                fi
+            done
+
+            # If not risky, run the command directly
+            echo "[$timestamp] User: $username | Command: docker $* | Found as: not risky" >> "$log_file"
             command docker "$@"
-        fi
-    }
+        }
 
-    # CUDA
-    export CUDA_HOME=/usr/local/cuda
-    export PATH=$PATH:$CUDA_HOME/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_HOME/lib64
+        ```
+    - sudo vi /usr/local/bin/docker_event_logger.sh
+        ```bash
+        #!/bin/bash
+        log_file="/var/tmp/docker_logs/docker_events_log.txt"
 
-    ```
+        # can use grep --line-buffered -E 'create|destroy|start|stop|restart|update|remove' to filter out events
+        docker events --format '{{.Time}} {{.Action}} {{.Type}} {{.Actor.ID}} {{.Actor.Attributes.name}}' | \
+        while read -r time action type id name; do
+            # Convert Docker event time to a human-readable format with high precision
+            timestamp=$(date -d "@$(( ${time%%.*} ))" '+%Y-%m-%d %H:%M:%S')${time#*.}
+            echo "[$timestamp] Action: $action | Type: $type | ID: $id | Name: $name" >> "$log_file"
+        done
+        ```
+    - sudo chmod +x /usr/local/bin/docker_event_logger.sh
+    - sudo vi /etc/systemd/system/docker-event-logger.service
+        ```bash
+        [Unit]
+        Description=Docker Event Logger
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/local/bin/docker_event_logger.sh
+        Restart=always
+        User=root
+
+        [Install]
+        WantedBy=multi-user.target
+        ```
+    - sudo systemctl daemon-reload && sudo systemctl start docker-event-logger.service && sudo systemctl enable docker-event-logger.service
+    - sudo vi /etc/logrotate.d/docker_command_log
+        ```bash
+        /var/tmp/docker_logs/docker_command_log.txt {
+            monthly
+            rotate 12
+            compress
+            missingok
+            notifempty
+            copytruncate
+        }
+
+        ```
+    - sudo vi /etc/logrotate.d/docker_events_log
+        ```bash
+        /var/tmp/docker_logs/docker_events_log.txt {
+            monthly
+            rotate 12
+            compress
+            missingok
+            notifempty
+            create 644 root root
+            postrotate
+                systemctl restart docker-event-logger.service > /dev/null 2>&1 || true
+            endscript
+        }
+        ```
 - make orin high performance by sudo nvpmodel -m 0 and sudo jetson_clocks
     * nvpmodel has 4 modes 0-3, where 0 is the max performance/no constraints mode, while performance increases from 1 (only 4 CPUs active) to 3
     * sudo jetson_clocks is not persistent accross boots
@@ -210,6 +275,10 @@
 - install cuda 11.8 toolkit so that you can use 11.8 when needed as well
     * https://developer.nvidia.com/blog/simplifying-cuda-upgrades-for-nvidia-jetson-users/
     * https://docs.nvidia.com/cuda/cuda-for-tegra-appnote/index.html#cuda-upgradable-package-for-jetson
+- setup user-only docker mimic using logging docker events:
+    * https://docs.docker.com/reference/cli/docker/system/events/
+    * use a external python script for json parsing and telling shell script what to do
+    * put constraints on storage space, deletion, creation etc
 
 # miscellaneous resources
 * https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html
@@ -242,59 +311,3 @@ volumes:
     - /opt/nvidia/vpi:/opt/nvidia/vpi
 ```
 * deleting a user including all files etc: `sudo userdel -r <username>`
-
-# [did not work] rootless docker efforts
-## docker install (rootless)
-- first do a clean uninstall:
-    - docker system prune -a --volumes; sudo systemctl disable --now docker.service docker.socket; sudo rm /var/run/docker.sock; dockerd-rootless-setuptool.sh uninstall; /usr/bin/rootlesskit rm -rf ~/.local/share/docker
-    - for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
-    - sudo apt-get purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
-    - sudo rm -rf /var/lib/docker && sudo rm -rf /var/lib/containerd && sudo rm -rf /etc/docker && rm -rf ~/.config/docker
-    - sudo apt update && sudo apt upgrade && sudo apt autoremove && sudo apt clean && sudo apt autoclean
-- sudo apt-get update && sudo apt-get install ca-certificates curl
-- sudo install -m 0755 -d /etc/apt/keyrings
-- sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-- sudo chmod a+r /etc/apt/keyrings/docker.asc
-- echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-- sudo apt-get update && sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-- sudo apt-get install -y dbus-user-session && sudo apt-get install -y uidmap
-- sudo reboot
-- sudo systemctl disable --now docker.service docker.socket && sudo rm /var/run/docker.sock
-- sudo reboot
-- dockerd-rootless-setuptool.sh install
-    * [INFO] To control docker.service, run: `systemctl --user (start|stop|restart) docker.service`
-- systemctl --user start docker && systemctl --user enable docker && sudo loginctl enable-linger $(whoami)
-- sudo loginctl enable-linger amrl_user
-
-
-
-- echo "export PATH=/usr/bin:$PATH" >> ~/.bashrc && echo "export DOCKER_HOST=unix:///run/user/1000/docker.sock" >> ~/.bashrc
-- sudo -i
-- mkdir -p /etc/systemd/system/user@.service.d && vi /etc/systemd/system/user@.service.d/delegate.conf
-    ```
-    [Service]
-    Delegate=cpu cpuset io memory pids
-    ```
-- systemctl daemon-reload
-- echo "net.ipv4.ping_group_range = 0 2147483647" >> /etc/sysctl.conf && echo "net.ipv4.ip_unprivileged_port_start = 0" >> /etc/sysctl.conf && echo "net.bridge.bridge-nf-call-iptables = 1" >> /etc/sysctl.conf && echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.conf
-- sysctl -p /etc/sysctl.conf. See if you get any errors. If you do run:
-    * modprobe bridge && modprobe br_netfilter
-- sudo sysctl --system
-- systemctl --user daemon-reload && systemctl --user restart docker.service
-
-
-- run docker in rootless mode like in robolidar (`docker info | grep -i root`, note robolidar has podman, not docker):
-    * https://collabnix.com/how-to-run-docker-in-a-rootless-mode/
-
-## podman setup (rootless by default)
-- sudo apt-get update && sudo apt-get -y install podman
-- podman --version
-- sudo ln -s $(which podman) /usr/bin/docker && docker --version
-- for podman ([ref1](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/cdi-support.html) [ref2](https://forums.developer.nvidia.com/t/podman-gpu-on-jetson-agx-orin/297734/9))
-    - sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml --mode=csv
-     --device-name-strategy=type-index
-    - nvidia-ctk cdi list, to see available options (e.g., `nvidia.com/gpu=0` and `nvidia.com/gpu=all`)
-    - sudo nvidia-ctk config --in-place --set nvidia-container-runtime.mode=cdi
