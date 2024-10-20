@@ -135,8 +135,8 @@
     - `sudo quotaon -v /` to turn on the quotas
     - `sudo reboot`
 - Log everything for docker:
-    - sudo mkdir /var/tmp/docker_logs && sudo chmod 777 /var/tmp/docker_logs
-    - sudo touch /var/tmp/docker_logs/docker_command_log.txt /var/tmp/docker_logs/docker_events_log.txt && sudo chmod 666 /var/tmp/docker_logs/docker_command_log.txt /var/tmp/docker_logs/docker_events_log.txt
+    - sudo mkdir /var/log/docker_logs && sudo chown root:root /var/log/docker_logs/ && sudo chmod 755 /var/log/docker_logs/
+    - sudo touch /var/log/docker_logs/docker_command_log.txt /var/log/docker_logs/docker_events_log.txt && sudo chmod 666 /var/log/docker_logs/docker_command_log.txt /var/log/docker_logs/docker_events_log.txt
     - sudo vi /etc/bash.bashrc
         ```bash
         # CUDA
@@ -152,30 +152,31 @@
 
             # List of risky keywords to detect in the entire command
             risky_keywords=("rm" "rmi" "prune" "destroy" "die" "kill" "pause" "rename" "restart" "stop" "delete" "untag" "remove" "disable" "unmount" "disconnect" "reload")
+            # Combine risky keywords into a regex pattern that matches whole words
+            risky_pattern="\\b($(IFS='|'; echo "${risky_keywords[*]}"))\\b"
 
             # Log file path
-            log_file="/var/tmp/docker_logs/docker_command_log.txt"
+            log_file="/var/log/docker_logs/docker_command_log.txt"
             timestamp=$(date '+%Y-%m-%d %H:%M:%S.%N')
             username=$(whoami)
 
             # Check if any risky keyword appears in the entire command
-            for keyword in "${risky_keywords[@]}"; do
-                if [[ "$*" == *"$keyword"* ]]; then
-                    echo -e "${RED}Are you sure you want to do this? Make sure you do NOT affect other users' objects. (y/n)${NC}"
-                    read -r confirmation
+            if [[ "$*" =~ $risky_pattern ]]; then
+                risky_match=$(echo "$*" | grep -Eo "$risky_pattern")
+                echo -e "${RED}Are you sure you want to do this? Make sure you do NOT affect other users' objects. (y/n)${NC}"
+                read -r confirmation
 
-                    if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
-                        # Run the original docker command
-                        echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $keyword:proceeded" >> "$log_file"
-                        command docker "$@"
-                        return
-                    else
-                        echo "Aborted."
-                        echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $keyword:aborted" >> "$log_file"
-                        return 1
-                    fi
+                if [[ "$confirmation" == "y" || "$confirmation" == "yes" ]]; then
+                    # Run the original docker command
+                    echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $risky_match:proceeded" >> "$log_file"
+                    command docker "$@"
+                    return
+                else
+                    echo "Aborted."
+                    echo "[$timestamp] User: $username | Command: docker $* | Found as: risky $risky_match:aborted" >> "$log_file"
+                    return 1
                 fi
-            done
+            fi
 
             # If not risky, run the command directly
             echo "[$timestamp] User: $username | Command: docker $* | Found as: not risky" >> "$log_file"
@@ -186,13 +187,25 @@
     - sudo vi /usr/local/bin/docker_event_logger.sh
         ```bash
         #!/bin/bash
-        log_file="/var/tmp/docker_logs/docker_events_log.txt"
+        log_file="/var/log/docker_logs/docker_events_log.txt"
 
         # can use grep --line-buffered -E 'create|destroy|start|stop|restart|update|remove' to filter out events
-        docker events --format '{{.Time}} {{.Action}} {{.Type}} {{.Actor.ID}} {{.Actor.Attributes.name}}' | \
-        while read -r time action type id name; do
-            # Convert Docker event time to a human-readable format with high precision
-            timestamp=$(date -d "@$(( ${time%%.*} ))" '+%Y-%m-%d %H:%M:%S')${time#*.}
+        docker events --format '{{json .}}' | \
+        while read -r event; do
+            # Extract the correct time field
+            time=$(echo "$event" | jq -r '.timeNano')
+            # Check if 'time' is not empty
+            if [[ -n "$time" && "$time" != "null" ]]; then
+                # Convert timeNano to seconds and nanoseconds
+                timestamp=$(date -d "@$((time/1000000000))" '+%Y-%m-%d %H:%M:%S').$(printf "%09d" $((time%1000000000)))
+            else
+                # Handle cases where timeNano is missing
+                timestamp=$(date '+%Y-%m-%d %H:%M:%S.%N')
+            fi
+            action=$(echo "$event" | jq -r '.Action')
+            type=$(echo "$event" | jq -r '.Type')
+            id=$(echo "$event" | jq -r '.Actor.ID // "<no value>"')
+            name=$(echo "$event" | jq -r '.Actor.Attributes.name // "<no value>"')
             echo "[$timestamp] Action: $action | Type: $type | ID: $id | Name: $name" >> "$log_file"
         done
         ```
@@ -216,7 +229,7 @@
     - sudo systemctl daemon-reload && sudo systemctl start docker-event-logger.service && sudo systemctl enable docker-event-logger.service
     - sudo vi /etc/logrotate.d/docker_command_log
         ```bash
-        /var/tmp/docker_logs/docker_command_log.txt {
+        /var/log/docker_logs/docker_command_log.txt {
             monthly
             rotate 12
             compress
@@ -228,7 +241,7 @@
         ```
     - sudo vi /etc/logrotate.d/docker_events_log
         ```bash
-        /var/tmp/docker_logs/docker_events_log.txt {
+        /var/log/docker_logs/docker_events_log.txt {
             monthly
             rotate 12
             compress
