@@ -172,9 +172,14 @@ RUN apt-get update && apt-get install -y \
     ros-humble-nav2-costmap-2d \
     && rm -rf /var/lib/apt/lists/*
 
-# Install specific protobuf version and Bosdyn packages for spot_ros
+# Install specific protobuf version and Bosdyn packages for spot_ros, bosydn version matches the sdk version onboard spot
+ARG BD_VER=4.0.2
 RUN pip3 install protobuf==3.20.1 && \
-    pip3 install cython empy bosdyn-client==3.1.1 bosdyn-mission==3.1.1 bosdyn-api==3.1.1 bosdyn-core==3.1.1 virtualenv jetson-stats rospkg ros2-numpy \
+    pip3 install cython empy virtualenv jetson-stats rospkg ros2-numpy \
+    bosdyn-client==$BD_VER \
+    bosdyn-mission==$BD_VER \
+    bosdyn-api==$BD_VER \
+    bosdyn-core==$BD_VER \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies for graph_navigation
