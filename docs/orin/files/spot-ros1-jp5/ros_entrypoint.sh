@@ -17,11 +17,11 @@ if [ ! -f /initialized ]; then
 	cd /root/catkin_ws/src
 
 	# Clone vectornav and set imu_output_rate in params file
-	git clone git@github.com:dawonn/vectornav.git --recursive
+	git clone --recursive git@github.com:dawonn/vectornav.git
 	sed -i 's/imu_output_rate:.*/imu_output_rate: 200/' /root/catkin_ws/src/vectornav/params/vn200.yaml
 
 	# Clone spot_ros repo
-	git clone git@github.com:ut-amrl/spot_ros.git --recursive
+	git clone --recursive git@github.com:ut-amrl/spot_ros.git
 
 	# Build the catkin workspace
 	cd /root/catkin_ws
@@ -35,9 +35,9 @@ if [ ! -f /initialized ]; then
 	mkdir -p /root/ut-amrl
 	cd /root/ut-amrl
 
-	git clone git@github.com:ut-amrl/amrl_msgs.git --recursive
-	git clone git@github.com:ut-amrl/k4a_ros.git --recursive
-	git clone git@github.com:ut-amrl/spot_autonomy.git --recursive
+	git clone --recursive git@github.com:ut-amrl/amrl_msgs.git
+	git clone --recursive git@github.com:ut-amrl/k4a_ros.git
+	git clone --recursive git@github.com:ut-amrl/spot_autonomy.git
 
 	# Create symbolic links
 	ln -s /root/ut-amrl/spot_autonomy/graph_navigation /root/ut-amrl/graph_navigation
@@ -166,6 +166,17 @@ if [ ! -f /initialized ]; then
 	}
 
 	alias conda-create="conda_create_hook"
+
+	gitall() {
+		if [ -z "$1" ]; then
+			git add . && git commit -m "changes"
+		else
+			git add . && git commit -m "$1"
+		fi
+	}
+	alias expros='export ROS_PACKAGE_PATH=$(pwd):$ROS_PACKAGE_PATH'
+	alias listpycache='find . -type d -name "__pycache__" -print'
+	alias cleanpycache='listpycache 2>/dev/null | xargs rm -rf 2>/dev/null'
 
 	END
 else
