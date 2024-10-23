@@ -16,12 +16,8 @@ if [ ! -f /initialized ]; then
 	mkdir -p /root/catkin_ws/src
 	cd /root/catkin_ws/src
 
-	# Clone vectornav and set imu_output_rate in params file
-	git clone --recursive git@github.com:dawonn/vectornav.git
-	sed -i 's/imu_output_rate:.*/imu_output_rate: 200/' /root/catkin_ws/src/vectornav/params/vn200.yaml
-
 	# Clone spot_ros repo
-	git clone --recursive git@github.com:ut-amrl/spot_ros.git
+	git clone --recursive --branch ldos_sim git@github.com:ut-amrl/spot_ros.git
 
 	# Build the catkin workspace
 	cd /root/catkin_ws
@@ -35,32 +31,22 @@ if [ ! -f /initialized ]; then
 	mkdir -p /root/ut-amrl
 	cd /root/ut-amrl
 
-	git clone --recursive git@github.com:ut-amrl/amrl_msgs.git
-	git clone --recursive git@github.com:ut-amrl/k4a_ros.git
-	git clone --recursive git@github.com:ut-amrl/spot_autonomy.git
+	git clone --recursive git@github.com:ut-amrl/ldos_sim.git
 
-	# Create symbolic links
-	ln -s /root/ut-amrl/spot_autonomy/graph_navigation /root/ut-amrl/graph_navigation
-	ln -s /root/ut-amrl/spot_autonomy/webviz /root/ut-amrl/webviz
-	ln -s /root/ut-amrl/spot_autonomy/maps /root/ut-amrl/amrl_maps
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_maps:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_msgs:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/graph_navigation:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/ut_automata:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/webviz:$ROS_PACKAGE_PATH
 
-	# Copy and rename the launch file
-	cp /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch.example /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch
-
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
-
-	# Build the amrl_msgs, k4a_ros, and spot_autonomy projects in order
-	cd /root/ut-amrl/amrl_msgs
+	cd /root/ut-amrl/ldos_sim/third_party/amrl_msgs
 	make -j$(nproc) || true
-
-	cd /root/ut-amrl/k4a_ros
+	cd /root/ut-amrl/ldos_sim/third_party/graph_navigation
 	make -j$(nproc) || true
-
-	cd /root/ut-amrl/spot_autonomy
+	cd /root/ut-amrl/ldos_sim/third_party/ut_automata
+	make -j$(nproc) || true
+	cd /root/ut-amrl/ldos_sim/third_party/webviz
 	make -j$(nproc) || true
 
 	# Add the Python path for the amrl_msgs package if it exists
@@ -134,11 +120,13 @@ if [ ! -f /initialized ]; then
 	fi
 
 	# Repos
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
+
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_maps:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_msgs:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/graph_navigation:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/ut_automata:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/webviz:$ROS_PACKAGE_PATH
 
 	# Add the Python path for the amrl_msgs package if it exists
 	if rospack find amrl_msgs &> /dev/null; then
