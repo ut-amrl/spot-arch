@@ -33,20 +33,27 @@ if [ ! -f /initialized ]; then
 
 	git clone --recursive git@github.com:ut-amrl/ldos_sim.git
 
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_maps:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_msgs:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/graph_navigation:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/ut_automata:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/webviz:$ROS_PACKAGE_PATH
+	# Create symbolic links
+	ln -s /root/ut-amrl/ldos_sim/third_party/amrl_maps /root/ut-amrl/amrl_maps
+	ln -s /root/ut-amrl/ldos_sim/third_party/amrl_msgs /root/ut-amrl/amrl_msgs
+	ln -s /root/ut-amrl/ldos_sim/third_party/graph_navigation /root/ut-amrl/graph_navigation
+	ln -s /root/ut-amrl/ldos_sim/third_party/ut_automata /root/ut-amrl/ut_automata
+	ln -s /root/ut-amrl/ldos_sim/third_party/webviz /root/ut-amrl/webviz
 
-	cd /root/ut-amrl/ldos_sim/third_party/amrl_msgs
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/ldos_sim
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/ut_automata
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/webviz
+
+	cd /root/ut-amrl/amrl_msgs
 	make -j$(nproc) || true
-	cd /root/ut-amrl/ldos_sim/third_party/graph_navigation
+	cd /root/ut-amrl/graph_navigation
 	make -j$(nproc) || true
-	cd /root/ut-amrl/ldos_sim/third_party/ut_automata
+	cd /root/ut-amrl/ut_automata
 	make -j$(nproc) || true
-	cd /root/ut-amrl/ldos_sim/third_party/webviz
+	cd /root/ut-amrl/webviz
 	make -j$(nproc) || true
 
 	# Add the Python path for the amrl_msgs package if it exists
@@ -120,13 +127,12 @@ if [ ! -f /initialized ]; then
 	fi
 
 	# Repos
-
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_maps:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/amrl_msgs:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/graph_navigation:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/ut_automata:$ROS_PACKAGE_PATH
-	export ROS_PACKAGE_PATH=/root/ut-amrl/ldos_sim/third_party/webviz:$ROS_PACKAGE_PATH
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/ldos_sim
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/ut_automata
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/webviz
 
 	# Add the Python path for the amrl_msgs package if it exists
 	if rospack find amrl_msgs &> /dev/null; then
