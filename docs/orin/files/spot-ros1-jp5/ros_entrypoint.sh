@@ -21,7 +21,7 @@ if [ ! -f /initialized ]; then
 	sed -i 's/imu_output_rate:.*/imu_output_rate: 200/' /root/catkin_ws/src/vectornav/params/vn200.yaml
 
 	# Clone spot_ros repo
-	git clone --recursive git@github.com:ut-amrl/spot_ros.git
+	git clone --recursive --branch ldos_sim git@github.com:ut-amrl/spot_ros.git
 
 	# Build the catkin workspace
 	cd /root/catkin_ws
@@ -37,7 +37,7 @@ if [ ! -f /initialized ]; then
 
 	git clone --recursive git@github.com:ut-amrl/amrl_msgs.git
 	git clone --recursive git@github.com:ut-amrl/k4a_ros.git
-	git clone --recursive git@github.com:ut-amrl/spot_autonomy.git
+	git clone --recursive --branch ldos_sim git@github.com:ut-amrl/spot_autonomy.git
 
 	# Create symbolic links
 	ln -s /root/ut-amrl/spot_autonomy/graph_navigation /root/ut-amrl/graph_navigation
