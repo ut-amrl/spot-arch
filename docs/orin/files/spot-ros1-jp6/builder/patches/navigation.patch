@@ -1,0 +1,12 @@
+diff --git a/map_server/CMakeLists.txt b/map_server/CMakeLists.txt
+index 37a67cc3..147c9ae5 100644
+--- a/map_server/CMakeLists.txt
++++ b/map_server/CMakeLists.txt
+@@ -94,6 +94,7 @@ if(CATKIN_ENABLE_TESTING)
+   )
+ 
+   find_package(roslib REQUIRED)
++  include_directories(${roslib_INCLUDE_DIRS})
+   add_executable(rtest test/rtest.cpp test/test_constants.cpp)
+   add_dependencies(rtest ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+   add_dependencies(tests rtest)

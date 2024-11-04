@@ -1,0 +1,360 @@
+# FROM dustynv/l4t-pytorch:r35.4.1
+FROM dustynv/l4t-pytorch:r36.3.0-cu124
+
+# env vars
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV TZ=America/Chicago
+ENV ROS_DISTRO=noetic
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/torch
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/torch/lib
+ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python3.10/dist-packages/torch/share/cmake/Torch
+
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${PATH}:${CUDA_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
+ENV PIP_ROOT_USER_ACTION=ignore
+
+# Set up timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y apt-utils && \
+    apt-get install -q -y --no-install-recommends tzdata dirmngr gnupg2 build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+#########################################################################################################################################
+
+# tools for torch torchvision
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.10 \
+    python3.10-dev \
+    python3-pip \
+    python-is-python3 \
+    libopenblas-base \
+    libopenblas-dev \
+    libopenmpi-dev \
+    libomp-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpython3-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libqt5websockets5-dev \
+    qtcreator \
+    qtbase5-dev \
+    qt5-qmake \
+    qtchooser \
+    qtbase5-dev-tools \
+    cmake \
+    libssl-dev \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+#########################################################################################################################################
+
+RUN apt-get update && apt-get install -y \
+    apt-utils \
+    curl \
+    software-properties-common \
+    build-essential \
+    clang-12 \
+    clang-format \
+    cmake \
+    g++ \
+    gcc \
+    gdb \
+    git \
+    nano \
+    valgrind \
+    vim \
+    emacs \
+    iputils-ping \
+    less \
+    mesa-utils \
+    net-tools \
+    rsync \
+    tmux \
+    screen \
+    tree \
+    unzip \
+    usbutils \
+    zip \
+    zsh \
+    wget \
+    htop \
+    ppa-purge \
+    libfreeimage3 \
+    libfreeimage-dev \
+    libopenblas-dev \
+    joystick \
+    ffmpeg \
+    espeak \
+    mpg123 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Git Large File Storage (git-lfs)
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install -y git-lfs && \
+    git lfs install 2>/dev/null
+
+# not needed as forwarding audio from host
+#RUN apt-get update && apt-get install -y \
+#    alsa-base alsa-utils pulseaudio pavucontrol \
+#    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get autoclean -y && apt-get clean -y
+
+################################################################################################## (packages)
+
+# Install dependencies for amrl_shared_lib
+RUN apt-get update && apt-get install -y \
+    libgtest-dev libgoogle-glog-dev cmake build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for spot_ros
+RUN apt-get update && apt-get install -y \
+    python3-tk \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install specific protobuf version and Bosdyn packages for spot_ros, bosydn version matches the sdk version onboard spot
+ARG BD_VER=4.0.2
+RUN pip3 install protobuf==3.20.1 && \
+    pip3 install cython empy==3.3.4 virtualenv jetson-stats rosinstall_generator \
+    bosdyn-client==$BD_VER \
+    bosdyn-mission==$BD_VER \
+    bosdyn-api==$BD_VER \
+    bosdyn-core==$BD_VER \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for graph_navigation
+RUN apt-get update && apt-get install -y \
+    libgoogle-glog-dev libgflags-dev liblua5.1-0-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for enml
+RUN apt-get update && apt-get install -y \
+    liblua5.1-dev libeigen3-dev \
+    libjpeg8-dev libgoogle-perftools-dev \
+    libsuitesparse-dev libblas-dev liblapack-dev libopenmpi-dev \
+    libgoogle-glog-dev libgflags-dev libceres-dev libtbb-dev \
+    libncurses5-dev libpopt-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for webviz and robofleet_client
+RUN apt-get update && apt-get install -y \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for k4a_ros
+RUN apt-get update && apt-get install -y \
+    liblua5.1-0-dev \
+    libgflags-dev \
+    libgoogle-glog-dev \
+    libgoogle-perftools-dev \
+    cimg-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for spot_autonomy
+RUN apt-get update && apt-get install -y \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch to Ubuntu 20.04 (Focal) sources temporarily for libsoundio1 installation
+RUN cp /etc/apt/sources.list /etc/apt/sources.list.backup && \
+    sed -i 's/jammy/focal/g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y libsoundio1
+
+RUN wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.2_arm64.deb && \
+    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.2_arm64.deb && \
+    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/k/k4a-tools/k4a-tools_1.4.2_arm64.deb
+
+RUN echo 'libk4a1.4 libk4a1.4/accepted-eula-hash string 0f5d5c5de396e4fee4c0753a21fee0c1ed726cf0316204edda484f08cb266d76' | debconf-set-selections && \
+    echo 'libk4a1.4 libk4a1.4/accept-eula boolean true' | debconf-set-selections && \
+    dpkg -i libk4a1.4_1.4.2_arm64.deb && \
+    dpkg -i libk4a1.4-dev_1.4.2_arm64.deb && \
+    dpkg -i k4a-tools_1.4.2_arm64.deb
+
+# Restore the original sources list for Ubuntu 22.04 (Jammy)
+RUN mv /etc/apt/sources.list.backup /etc/apt/sources.list && \
+    apt-get update
+
+# Install Miniconda to /opt/miniconda
+RUN wget -O Miniconda3-py310_24.7.1-0-Linux-aarch64.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    bash Miniconda3-py310_24.7.1-0-Linux-aarch64.sh -b -p /opt/miniconda3 && \
+    rm Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    /opt/miniconda3/bin/conda config --set auto_activate_base false
+
+# conda bash completion
+RUN /opt/miniconda3/bin/conda install -c conda-forge conda-bash-completion -y
+
+# needed for ros1 building
+RUN apt-get update && apt-get install -y \
+    libboost-all-dev \
+    libboost-thread-dev \
+    libboost-system-dev \
+    libboost-filesystem-dev \
+    libboost-regex-dev \
+    libboost-program-options-dev \
+    libconsole-bridge-dev \
+    libpoco-dev \
+    libtinyxml2-dev \
+    liblz4-dev \
+    libbz2-dev \
+    libtinyxml-dev \
+    uuid-dev \
+    liblog4cxx-dev \
+    libgpgme-dev \
+    libgtest-dev \
+    libcurl4-openssl-dev \
+    liborocos-kdl-dev \
+    libbullet-dev \
+    liburdfdom-headers-dev \
+    libsdl1.2-dev \
+    libsdl-image1.2-dev \
+    libyaml-cpp-dev \
+    libpcap-dev \
+    libturbojpeg0-dev \
+    libpcl-dev \
+    liburdfdom-dev \
+    libassimp-dev \
+    libogre-1.9-dev \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    python3-rosdep2 \
+    python3-vcstools \
+    python3-empy \
+    python3-nose \
+    python3-pycryptodome \
+    python3-pyqt5 \
+    python3-sip \
+    python3-sip-dev \
+    pyqt5-dev \
+    python3-defusedxml \
+    python3-mock \
+    python3-netifaces \
+    python3-gnupg \
+    python3-numpy \
+    python3-psutil \
+    python3-sip-dev \
+    python3-sip \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
+COPY ./ros_entrypoint.sh /
+COPY ./builder/clone_repos.sh /root/builder/clone_repos.sh
+COPY ./builder/patches/* /root/builder/patches/
+
+# Installing ceres1.14.0 and eigen3.3.7 and liborocos-kdl-dev1.4 for compatibility
+# Base setup
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    cmake libgoogle-glog-dev libgflags-dev libatlas-base-dev libeigen3-dev libsuitesparse-dev && \
+    apt-get remove -y libceres-dev libceres2 libeigen3-dev liborocos-kdl-dev liborocos-kdl1.5 && \
+    rm -rf /var/lib/apt/lists/*
+
+# cmake TBB Fix (https://github.com/ceres-solver/ceres-solver/issues/669)
+RUN cd /usr/include/tbb && \
+    wget -O tbb_stddef.h https://raw.githubusercontent.com/oneapi-src/oneTBB/refs/tags/v2021.1.1/include/oneapi/tbb/version.h
+
+# Eigen Installation (https://tttapa.github.io/Pages/Ubuntu/Software-Installation/Eigen3.html)
+RUN mkdir -p ~/custom_builds && cd ~/custom_builds && \
+    rm -rf /usr/include/eigen3 /usr/include/Eigen /usr/local/include/eigen3 /usr/local/include/Eigen && \
+    git clone --single-branch --depth=1 --branch "3.3.7" https://gitlab.com/libeigen/eigen.git && \
+    mkdir eigen/build && cd eigen/build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr" && \
+    make install && \
+    cp -r /usr/include/eigen3/* /usr/include/
+
+# Ceres Solver Installation ([repo](https://github.com/ceres-solver/ceres-solver), [fix-issue](https://github.com/ceres-solver/ceres-solver/issues/392), [fix-patch](https://github.com/mystorm16/ceres-solver/commit/17c1d4239984293af7fa1dcfb853d1101e44218c), [installation-guide](http://ceres-solver.org/installation.html#linux))
+RUN cd ~/custom_builds && \
+    wget https://github.com/ceres-solver/ceres-solver/archive/refs/tags/1.14.0.tar.gz && \
+    tar zxf 1.14.0.tar.gz && cd ceres-solver-1.14.0/internal/ceres && \
+    sed -i 's/options.max_num_iterations = 300;  \/\/ Cost function is hard./options.max_num_iterations = 50;/' evaluation_callback_test.cc && \
+    cd ~/custom_builds && \
+    mkdir ceres-bin && cd ceres-bin && \
+    cmake ../ceres-solver-1.14.0 && \
+    make -j$(nproc) && \
+    make test && \
+    make install
+
+# liborocos-kdl (c++ library only, not doing python3 part) ([ref](https://github.com/orocos/orocos_kinematics_dynamics/blob/master/orocos_kdl/INSTALL.md#without-catkin))
+RUN cd ~/custom_builds && \
+    git clone --branch release-1.4 https://github.com/orocos/orocos_kinematics_dynamics.git && \
+    cd orocos_kinematics_dynamics/orocos_kdl && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /var/lib/apt/lists/*
+
+# libpcl-dev as this also gets uninstalled on removing libeigen3-dev (https://pcl.readthedocs.io/projects/tutorials/en/latest/compiling_pcl_posix.html#stable)
+RUN cd ~/custom_builds && \
+    wget https://github.com/PointCloudLibrary/pcl/archive/refs/tags/pcl-1.10.0.tar.gz && \
+    tar xvf pcl-1.10.0.tar.gz && \
+    cd pcl-pcl-1.10.0 && \
+    mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /var/lib/apt/lists/*
+
+## ROS Noetic build
+# Fix for log4cxx error
+RUN temp_file_path="/usr/include/log4cxx/boost-std-configuration.h" && \
+    sed -i 's/#define STD_SHARED_MUTEX_FOUND 1/#define STD_SHARED_MUTEX_FOUND 0/' "$temp_file_path" && \
+    sed -i 's/#define Boost_SHARED_MUTEX_FOUND 0/#define Boost_SHARED_MUTEX_FOUND 1/' "$temp_file_path"
+
+# Adapted from https://medium.com/@lukas_reisinger/building-ros-noetic-on-ubuntu-22-04-b3ca676c63e7
+# Clone and set up ROS Desktop Full repositories
+RUN export GIT_TERMINAL_PROMPT=0 && \
+    mkdir -p /root/ros_noetic_build_2204/catkin_ws/src && \
+    cd /root/ros_noetic_build_2204 && \
+    git clone https://github.com/ros-infrastructure/catkin_pkg.git -b 0.5.2 && \
+    git clone https://github.com/ros-infrastructure/rospkg.git -b 1.5.0 && \
+    cd /root/ros_noetic_build_2204/catkin_ws/src && \
+    mv /root/builder/clone_repos.sh . && \
+    ./clone_repos.sh || true
+
+# Apply patches
+RUN patch_dir="/root/builder/patches" && \
+    repo_base_dir="/root/ros_noetic_build_2204/catkin_ws/src" && \
+    for patch_file in "$patch_dir"/*.patch; do \
+    repo_name=$(basename "$patch_file" .patch); \
+    repo_dir="$repo_base_dir/$repo_name"; \
+    if [ -d "$repo_dir" ]; then \
+    echo "Applying patch $patch_file to $repo_dir"; \
+    (cd "$repo_dir" && git apply --ignore-whitespace "$patch_file"); \
+    if [ $? -ne 0 ]; then \
+    echo "Failed to apply patch $patch_file to $repo_dir"; \
+    else \
+    echo "Successfully applied patch $patch_file to $repo_dir"; \
+    fi; \
+    else \
+    echo "Repository directory $repo_dir does not exist. Skipping patch $patch_file."; \
+    fi; \
+    done
+
+# Install catkin_pkg and rospkg
+RUN cd /root/ros_noetic_build_2204/catkin_pkg && python3 setup.py install && \
+    cd /root/ros_noetic_build_2204/rospkg && python3 setup.py install && \
+    cd /root/ros_noetic_build_2204/catkin_ws && \
+    ./src/catkin/bin/catkin_make install -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 && \
+    rosdep init || true && \
+    rosdep update --rosdistro $ROS_DISTRO && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN cd ~ && rm -rf ~/custom_builds
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]
