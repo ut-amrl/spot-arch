@@ -365,10 +365,6 @@ RUN cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet_topic_to
 # for quality of life sourcing
 RUN mkdir -p /opt/ros && cd /opt/ros && ln -s /root/ros_noetic_build_2204/catkin_ws/devel noetic && cd ~
 
-# Set up environment
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/ros_noetic_build_2204/catkin_ws/install/lib
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/root/ros_noetic_build_2204/catkin_ws/install
-
 RUN cd ~ && rm -rf ~/custom_builds
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
