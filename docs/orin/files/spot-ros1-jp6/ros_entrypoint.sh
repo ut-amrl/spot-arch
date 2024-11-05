@@ -44,6 +44,7 @@ if [ ! -f /initialized ]; then
 
 	# Create symbolic links
 	ln -s /root/ut-amrl/spot_autonomy/graph_navigation /root/ut-amrl/graph_navigation
+	ln -s /root/ut-amrl/spot_autonomy/local_rgb_map /root/ut-amrl/local_rgb_map
 	ln -s /root/ut-amrl/spot_autonomy/webviz /root/ut-amrl/webviz
 	ln -s /root/ut-amrl/spot_autonomy/maps /root/ut-amrl/amrl_maps
 
@@ -54,6 +55,7 @@ if [ ! -f /initialized ]; then
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/local_rgb_map
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
 
 	# Build the amrl_msgs, k4a_ros, and spot_autonomy projects in order
@@ -141,6 +143,7 @@ if [ ! -f /initialized ]; then
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/local_rgb_map
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
 
 	# Add the Python path for the amrl_msgs package if it exists
