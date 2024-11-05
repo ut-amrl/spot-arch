@@ -255,6 +255,7 @@ COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 COPY ./ros_entrypoint.sh /
 COPY ./builder/clone_repos.sh /root/builder/clone_repos.sh
 COPY ./builder/patches/* /root/builder/patches/
+COPY ./builder/test_nodelets.xml /root/builder/test_nodelets.xml
 
 # Installing ceres1.14.0 and eigen3.3.7 and liborocos-kdl-dev1.4 for compatibility
 # Base setup
@@ -346,7 +347,6 @@ RUN patch_dir="/root/builder/patches" && \
     fi; \
     done
 
-# Install catkin_pkg and rospkg
 RUN cd /root/ros_noetic_build_2204/catkin_pkg && python3 setup.py install && \
     cd /root/ros_noetic_build_2204/rospkg && python3 setup.py install && \
     cd /root/ros_noetic_build_2204/catkin_ws && \
@@ -354,6 +354,12 @@ RUN cd /root/ros_noetic_build_2204/catkin_pkg && python3 setup.py install && \
     rosdep init || true && \
     rosdep update --rosdistro $ROS_DISTRO && \
     rm -rf /var/lib/apt/lists/*
+
+# https://blog.csdn.net/txr152111/article/details/119330981 fix
+RUN cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet_topic_tools && \
+    mkdir test && cd test && cp /root/builder/test_nodelets.xml . && chmod 666 test_nodelets.xml && \
+    cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet && \
+    cp /root/builder/test_nodelets.xml ./test_nodelet.xml && chmod 666 test_nodelet.xml && cd ~
 
 RUN cd ~ && rm -rf ~/custom_builds
 ENTRYPOINT ["/ros_entrypoint.sh"]
