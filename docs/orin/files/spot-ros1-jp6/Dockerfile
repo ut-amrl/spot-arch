@@ -361,6 +361,9 @@ RUN cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet_topic_to
     cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet && \
     cp /root/builder/test_nodelets.xml ./test_nodelet.xml && chmod 666 test_nodelet.xml && cd ~
 
+# for quality of life sourcing
+RUN mkdir -p /opt/ros && cd /opt/ros && ln -s /root/ros_noetic_build_2204/catkin_ws/devel noetic && cd ~
+
 RUN cd ~ && rm -rf ~/custom_builds
 ENTRYPOINT ["/ros_entrypoint.sh"]
 CMD ["bash"]
