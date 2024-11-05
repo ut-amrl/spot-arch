@@ -8,9 +8,10 @@ ENV LC_ALL=en_US.UTF-8
 ENV TZ=America/Chicago
 ENV ROS_DISTRO=noetic
 
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/torch
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.10/dist-packages/torch/lib
-ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python3.10/dist-packages/torch/share/cmake/Torch
+ENV DOCKERHOST_PYTHON_VERSION=3.10
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/lib
+ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/share/cmake/Torch
 
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
@@ -33,8 +34,8 @@ RUN echo 'Etc/UTC' > /etc/timezone && \
 
 # tools for torch torchvision
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.10 \
-    python3.10-dev \
+    python${DOCKERHOST_PYTHON_VERSION} \
+    python${DOCKERHOST_PYTHON_VERSION}-dev \
     python3-pip \
     python-is-python3 \
     libopenblas-base \
@@ -363,6 +364,10 @@ RUN cd /root/ros_noetic_build_2204/catkin_ws/install/share/test_nodelet_topic_to
 
 # for quality of life sourcing
 RUN mkdir -p /opt/ros && cd /opt/ros && ln -s /root/ros_noetic_build_2204/catkin_ws/devel noetic && cd ~
+
+# Set up environment
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/root/ros_noetic_build_2204/catkin_ws/install/lib
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/root/ros_noetic_build_2204/catkin_ws/install
 
 RUN cd ~ && rm -rf ~/custom_builds
 ENTRYPOINT ["/ros_entrypoint.sh"]

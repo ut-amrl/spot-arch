@@ -11,9 +11,7 @@ export DISPLAY=$(cat /tmp/.display_env_$HOST_UID)
 # Check if the initialization has already been done (using a marker file)
 if [ ! -f /initialized ]; then
 	echo "Running one-time setup for essential AMRL repos..."
-	source "/root/ros_noetic_build_2204/catkin_ws/devel/setup.bash"
-	export LD_LIBRARY_PATH=/root/ros_noetic_build_2204/catkin_ws/install/lib:$LD_LIBRARY_PATH
-	export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
+	source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 	# Clone and set up repositories
 	mkdir -p /root/catkin_ws/src
@@ -85,6 +83,7 @@ if [ ! -f /initialized ]; then
 
 	# Get the path of the newly created environment
 	env_path=$CONDA_PREFIX
+	python_version=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
 	# Create the activate.d and deactivate.d directories
 	mkdir -p $env_path/etc/conda/activate.d
@@ -92,23 +91,23 @@ if [ ! -f /initialized ]; then
 
 	# Add activation script to set up LD_LIBRARY_PATH and Torch_DIR
 	cat <<EOL > $env_path/etc/conda/activate.d/env_vars.sh
-	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python3.10/site-packages/torch:\$LD_LIBRARY_PATH
-	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python3.10/site-packages/torch/lib:\$LD_LIBRARY_PATH
-	export Torch_DIR=\$CONDA_PREFIX/lib/python*/site-packages/torch/share/cmake/Torch
+	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python${python_version}/site-packages/torch:\$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=\$CONDA_PREFIX/lib/python${python_version}/site-packages/torch/lib:\$LD_LIBRARY_PATH
+	export Torch_DIR=\$CONDA_PREFIX/lib/python${python_version}/site-packages/torch/share/cmake/Torch
 	EOL
 
 	# Add deactivation script to restore the system-wide paths
 	cat <<EOL > $env_path/etc/conda/deactivate.d/env_vars.sh
-	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python3.10\/site-packages\/torch:/}
-	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python3.10\/site-packages\/torch\/lib:/}
-	export Torch_DIR=/usr/local/lib/python3.10/dist-packages/torch/share/cmake/Torch
+	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python${python_version}\/site-packages\/torch:/}
+	export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH/\$CONDA_PREFIX\/lib\/python${python_version}\/site-packages\/torch\/lib:/}
+	export Torch_DIR=/usr/local/lib/python${python_version}/dist-packages/torch/share/cmake/Torch
 	EOL
 	END
 	chmod +x /root/.conda/hooks/post-create.sh
 
 	# add to .bashrc
 	cat >> /root/.bashrc <<- "END"
-	source "/root/ros_noetic_build_2204/catkin_ws/devel/setup.bash"
+	source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 	# Source the catkin workspace setup if it exists
 	if [[ -e /root/catkin_ws/devel/setup.bash ]]; then
@@ -170,9 +169,6 @@ if [ ! -f /initialized ]; then
 		bash ~/.conda/hooks/post-create.sh
 		conda deactivate
 	}
-
-	export LD_LIBRARY_PATH=/root/ros_noetic_build_2204/catkin_ws/install/lib:$LD_LIBRARY_PATH
-	export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
 
 	gitall() {
 		if [ -z "$1" ]; then

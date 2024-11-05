@@ -37,9 +37,9 @@ Now the process is as always:
 - set up [ssh forwarding](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/using-ssh-agent-forwarding) on your local machine, used for sshing into spot user account
 - set up X11 forwarding if you want the display to be forwarded to your local machine:
     * either add `ForwardX11 yes` and `ForwardX11Trusted yes` to your `~/.ssh/config` file for the entry for spot orin, or run ssh with `-X` and `-Y` flags
-- clone this repo `git clone --recursive --branch orin git@github.com:ut-amrl/spot-arch.git`
-- `cd spot-arch/docs/orin/files/spot-ros1-jp5`
-- `docker build -t spot-ros1-jp5:${USER} .` builds the docker image
+- clone this repo `git clone --recursive --branch ldos_orin git@github.com:ut-amrl/spot-arch.git`
+- `cd spot-arch/docs/orin/files/spot-ros1`
+- `docker build -f Dockerfile_jp5 -t spot-ros1-jp5:${USER} .` builds the docker image
 - `./container.sh` starts `spot-ros1-jp5-${USER}` container and attaches to it. Check the `container.sh` script for more info.
     * check [Notes](https://github.com/ut-amrl/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
 - `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to `start_clearpath_spot.launch` (NOT the one ending in `.example`)

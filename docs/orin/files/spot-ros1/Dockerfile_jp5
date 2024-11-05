@@ -10,9 +10,10 @@ ENV LC_ALL=C.UTF-8
 ENV ROS_DISTRO=noetic
 ENV TZ=America/Chicago
 
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.8/dist-packages/torch
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python3.8/dist-packages/torch/lib
-ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python3.8/dist-packages/torch/share/cmake/Torch
+ENV DOCKERHOST_PYTHON_VERSION=3.8
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/lib
+ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/share/cmake/Torch
 
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
@@ -67,8 +68,8 @@ RUN rosdep init && \
 
 # tools for torch torchvision
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.8 \
-    python3.8-dev \
+    python${DOCKERHOST_PYTHON_VERSION} \
+    python${DOCKERHOST_PYTHON_VERSION}-dev \
     python3-pip \
     python-is-python3 \
     libopenblas-base \
