@@ -13,8 +13,8 @@ if [ ! -f /initialized ]; then
 	echo "Running one-time setup for essential AMRL repos..."
 	source "/opt/ros/$ROS_DISTRO/setup.bash"
 	if [[ -d /root/ros_noetic_build_2204 ]]; then
-		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/root/ros_noetic_build_2204/catkin_ws/install/lib"
-		export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH:/root/ros_noetic_build_2204/catkin_ws/install"
+		export LD_LIBRARY_PATH=/root/ros_noetic_build_2204/catkin_ws/install/lib:$LD_LIBRARY_PATH
+		export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
 	fi
 
 	# Clone and set up repositories
@@ -36,8 +36,8 @@ if [ ! -f /initialized ]; then
 	# Source the catkin workspace setup
 	source /root/catkin_ws/devel/setup.bash
 	if [[ -d /root/ros_noetic_build_2204 ]]; then
-		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/root/ros_noetic_build_2204/catkin_ws/install/lib"
-		export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH:/root/ros_noetic_build_2204/catkin_ws/install"
+		export LD_LIBRARY_PATH=/root/ros_noetic_build_2204/catkin_ws/install/lib:$LD_LIBRARY_PATH
+		export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
 	fi
 
 	# Set up ~/ut-amrl directory and clone the other repositories
@@ -123,8 +123,8 @@ if [ ! -f /initialized ]; then
 	fi
 
 	if [[ -d /root/ros_noetic_build_2204 ]]; then
-		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/root/ros_noetic_build_2204/catkin_ws/install/lib"
-		export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH:/root/ros_noetic_build_2204/catkin_ws/install"
+		export LD_LIBRARY_PATH=/root/ros_noetic_build_2204/catkin_ws/install/lib:$LD_LIBRARY_PATH
+		export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
 	fi
 
 	# >>> conda initialize >>>
