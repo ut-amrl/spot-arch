@@ -32,13 +32,17 @@
 
 ## ssh server
 - sudo apt install openssh-server -y && sudo systemctl start ssh && sudo systemctl enable ssh
-- Security settings for ssh:
+- Security settings for ssh and for X11 to work in docker:
     - `sudo vi /etc/ssh/sshd_config` and change/uncomment the following lines:
         ```
         PasswordAuthentication no
         PubkeyAuthentication yes
         PermitRootLogin prohibit-password
         PermitEmptyPasswords no
+
+        X11Forwarding yes
+        X11DisplayOffset 10
+        X11UseLocalhost no
         ```
     - `sudo systemctl restart ssh`
 
