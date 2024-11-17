@@ -129,7 +129,7 @@ RUN apt-get update && apt-get install -y \
 # Install specific protobuf version and Bosdyn packages for spot_ros, bosydn version matches the sdk version onboard spot
 ARG BD_VER=4.0.2
 RUN pip3 install protobuf==3.20.1 && \
-    pip3 install cython empy==3.3.4 virtualenv jetson-stats rosinstall_generator \
+    pip3 install cython empy==3.3.4 virtualenv jetson-stats rosinstall_generator pydot \
     bosdyn-client==$BD_VER \
     bosdyn-mission==$BD_VER \
     bosdyn-api==$BD_VER \
@@ -202,6 +202,7 @@ RUN /opt/miniconda3/bin/conda install -c conda-forge conda-bash-completion -y
 # needed for ros1 building
 RUN apt-get update && apt-get install -y \
     libboost-all-dev \
+    graphviz \
     libboost-thread-dev \
     libboost-system-dev \
     libboost-filesystem-dev \
@@ -238,6 +239,7 @@ RUN apt-get update && apt-get install -y \
     python3-empy \
     python3-nose \
     python3-pycryptodome \
+    python3-pyqt5.qtsvg \
     python3-pyqt5 \
     python3-sip \
     python3-sip-dev \

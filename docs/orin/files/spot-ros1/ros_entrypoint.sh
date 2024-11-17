@@ -44,7 +44,7 @@ if [ ! -f /initialized ]; then
 	mkdir -p /root/ut-amrl
 	cd /root/ut-amrl
 
-	git clone --recursive git@github.com:ut-amrl/amrl_msgs.git
+	git clone --recursive --branch ldos_sim git@github.com:ut-amrl/amrl_msgs.git
 	git clone --recursive git@github.com:ut-amrl/k4a_ros.git
 	git clone --recursive --branch ldos_sim git@github.com:ut-amrl/spot_autonomy.git
 
