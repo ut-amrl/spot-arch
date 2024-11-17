@@ -30,6 +30,7 @@ Now the process is as always:
     export XAUTHORITY=$HOME/.Xauthority
     export PULSE_SERVER=/run/user/$HOST_UID/pulse/native
     echo $DISPLAY > /tmp/.display_env_$HOST_UID
+    echo $SSH_AUTH_SOCK > /tmp/.ssh_auth_sock_$HOST_UID
     ```
 - run `git lfs install`
 - setup your `~/.gitconfig` file like [this](files/.gitconfig). Change the name and email to your own.

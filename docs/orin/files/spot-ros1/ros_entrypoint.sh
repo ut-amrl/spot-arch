@@ -1,11 +1,8 @@
 #!/bin/bash
 set -e
 
-# Dynamically set SSH_AUTH_SOCK if it's available in the mounted /tmp directory
-if [ -n "$(find /tmp -type s -name 'agent.*' 2>/dev/null)" ]; then
-  export SSH_AUTH_SOCK=$(find /tmp -type s -name 'agent.*' 2>/dev/null)
-fi
-
+# Dynamically set SSH_AUTH_SOCK and DISPLAY
+export SSH_AUTH_SOCK=$(cat /tmp/.ssh_auth_sock_$HOST_UID)
 export DISPLAY=$(cat /tmp/.display_env_$HOST_UID)
 
 # Check if the initialization has already been done (using a marker file)
