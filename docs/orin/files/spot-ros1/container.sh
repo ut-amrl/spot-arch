@@ -48,6 +48,7 @@ docker run -it \
     --runtime nvidia \
     --network host \
     --ipc host \
+    --cgroupns host \
     --workdir /root \
     --group-add dialout \
     --privileged \
@@ -60,6 +61,7 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     -v ${HOME}/.Xauthority:/root/.Xauthority:rw \
     -v /dev/dri:/dev/dri:ro \
+    -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
     -v /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:rw \
     -v ${HOME}/.gitconfig:/root/.gitconfig:rw \
     -v /tmp:/tmp \
