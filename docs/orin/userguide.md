@@ -43,7 +43,7 @@ Now the process is as always:
 - `docker build -f Dockerfile_jp5 -t spot-ros1-jp5:${USER} .` builds the docker image
 - `./container.sh` starts `spot-ros1-jp5-${USER}` container and attaches to it. Check the `container.sh` script for more info.
     * check [Notes](https://github.com/ut-amrl/spot-arch/blob/orin/docs/orin/userguide.md#notes) below for docker commands info
-- `cd ~/ut-amrl/spot_autonomy/launch/` and add the spot user credentials (shared on UT Stache) to `start_clearpath_spot.launch` (NOT the one ending in `.example`)
+- set `SPOT_USERNAME` and `SPOT_PASSWORD` environment variables in `~/.bashrc`
 - to start the default autonomy stack, run `roslaunch spot_autonomy start_all.launch`
 
 # Notes
