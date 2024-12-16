@@ -51,8 +51,8 @@ if [ ! -f /initialized ]; then
 	ln -s /root/ut-amrl/spot_autonomy/webviz /root/ut-amrl/webviz
 	ln -s /root/ut-amrl/spot_autonomy/maps /root/ut-amrl/amrl_maps
 
-	# Copy and rename the launch file
-	cp /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch.example /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch
+	# Copy and rename the launch file (not required since .launch itself pushed now)
+	#cp /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch.example /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch
 
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
 	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
