@@ -21,6 +21,10 @@ ENV CUDA_HOME=/usr/local/cuda
 ENV PATH=${PATH}:${CUDA_HOME}/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
 ENV PIP_ROOT_USER_ACTION=ignore
+ENV PIP_NO_CACHE_DIR=
+ENV PIP_INDEX_URL=http://jetson.webredirect.org/jp6/cu124
+ENV PIP_EXTRA_INDEX_URL="https://pypi.org/simple https://pypi.ngc.nvidia.com"
+ENV PIP_TRUSTED_HOST="jetson.webredirect.org pypi.ngc.nvidia.com"
 
 # Set up timezone
 RUN echo 'Etc/UTC' > /etc/timezone && \

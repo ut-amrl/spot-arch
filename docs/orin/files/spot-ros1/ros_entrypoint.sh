@@ -14,6 +14,9 @@ if [ ! -f /initialized ]; then
 		export CMAKE_PREFIX_PATH=/root/ros_noetic_build_2204/catkin_ws/install:$CMAKE_PREFIX_PATH
 	fi
 
+	# weird pip install and cache bugfix (dec16 2024)
+	for file in /etc/xdg/pip/pip.conf /etc/pip.conf /usr/pip.conf /root/.config/pip/pip.conf /root/.pip/pip.conf; do [ -f "$file" ] && sed -i 's/^\s*\(no-cache-dir\s*=.*\)/# \1/' "$file" || true; done
+
 	# Clone and set up repositories
 	mkdir -p /root/catkin_ws/src
 	cd /root/catkin_ws/src
