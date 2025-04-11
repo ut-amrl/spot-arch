@@ -1,51 +1,55 @@
-# Usage: ./container.sh [--name CONTAINER_NAME] [--flag1=bla1 --flag2=bla2 ...] [IMAGE_NAME]
+# Usage: ./container.sh <image-name> <container-name> [--force] [--other-flags]
 #!/bin/bash
 
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# Default image name if none is provided
-DEFAULT_IMAGE_NAME="spot-ros1-jp5:${USER}"
-DEFAULT_CONTAINER_NAME="spot-ros1-jp5-${USER}"
-
 # Initialize variables for options and image name
-FLAGS=""
-IMAGE_NAME=""
-CONTAINER_NAME=""
+if [[ $# -lt 2 ]]; then
+  echo "Usage: $0 <image-name> <container-name> [--force] [--other-flags]"
+  exit 1
+fi
 
-# Parse arguments
+IMAGE_NAME="$1"
+CONTAINER_NAME="$2"
+FORCE_DELETE="0"
+FLAGS=""
+
+shift 2 # Move past required args
+
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --name) # Check for --name flag
-      CONTAINER_NAME="$2"
-      shift 2 # Shift past the flag and its value
-      ;;
-    --*) # Any other argument starting with "--" is treated as a flag
-      FLAGS="$FLAGS $1"
-      shift # Move to next argument
-      ;;
-    *)  # Anything else is treated as the image name
-      IMAGE_NAME="$1"
+    --force)
+      FORCE_DELETE=1
       shift
+      ;;
+    --*)
+      FLAGS="$FLAGS $1"
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1"
+      exit 1
       ;;
   esac
 done
 
-# If no image name is provided, use the default image name
-IMAGE_NAME=${IMAGE_NAME:-$DEFAULT_IMAGE_NAME}
 echo "Using image: $IMAGE_NAME"
-
-# If no --name flag is provided, use a default container name
-CONTAINER_NAME=${CONTAINER_NAME:-$DEFAULT_CONTAINER_NAME}
 echo "Using container name: $CONTAINER_NAME"
+
+if [[ "$FORCE_DELETE" == "1" ]]; then
+  yes | docker rm --force $CONTAINER_NAME
+fi
 
 echo "Additional flags: $FLAGS"
 
 # Run the Docker container with the provided or default image name and flags
-docker run -it \
+set -x
+docker run -d \
     --name $CONTAINER_NAME \
     --hostname orin \
     --runtime nvidia \
+    --gpus all \
     --network host \
     --ipc host \
     --cgroupns host \
@@ -60,6 +64,8 @@ docker run -it \
     -e HOST_UID=${HOST_UID} \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     -v ${HOME}/.Xauthority:/root/.Xauthority:rw \
+    -v ${HOME}/.ssh:/root/.ssh:rw \
+    -v ${HOME}/robot:/root/robot:rw \
     -v /dev/dri:/dev/dri:ro \
     -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
     -v /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:rw \
@@ -67,4 +73,5 @@ docker run -it \
     -v /tmp:/tmp \
     -u 0:0 \
     $FLAGS \
-    $IMAGE_NAME
+    $IMAGE_NAME \
+    sleep infinity

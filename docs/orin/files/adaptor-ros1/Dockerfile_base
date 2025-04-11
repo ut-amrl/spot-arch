@@ -1,0 +1,30 @@
+FROM dustynv/l4t-pytorch:r36.3.0-cu124
+RUN pip3 uninstall -y torchaudio torch torchvision
+RUN apt-get update && apt-get install -y \
+    git cmake ninja-build libopenblas-dev libblas-dev libeigen3-dev \
+    libjpeg-dev libpng-dev python3-dev python3-pip tmux nano \
+    && pip3 install --upgrade pip
+
+RUN git clone --branch v2.3.0 --depth 1 https://github.com/pytorch/pytorch.git /opt/pytorch
+WORKDIR /opt/pytorch
+RUN git submodule update --init --recursive
+RUN pip3 install -r requirements.txt
+
+# Build and install PyTorch
+ENV USE_NCCL=1 \
+    USE_DISTRIBUTED=1 \
+    TORCH_CUDA_ARCH_LIST="8.7" \
+    USE_CUDA=1
+RUN python3 setup.py develop
+
+# Build and install Orion
+RUN git clone --recursive https://github.com/eth-easl/orion.git /root/orion/ &&\
+    cd /root/orion/src/scheduler/ && sed -i 's|/usr/local/cuda-10.2|/usr/local/cuda-12.4|g' Makefile && \
+    cd /root/orion/src/cuda_capture/ && sed -i 's|/usr/local/cuda-10.2|/usr/local/cuda-12.4|g' Makefile
+
+RUN cd /root/orion/ && bash compile.sh
+RUN cd /root/orion/ && pip install -e .
+
+# OpenCV and dependencies
+RUN apt-get install -y ffmpeg libsm6 libxext6
+RUN pip install opencv-python
