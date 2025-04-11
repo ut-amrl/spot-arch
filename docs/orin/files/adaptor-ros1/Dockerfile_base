@@ -28,3 +28,81 @@ RUN cd /root/orion/ && pip install -e .
 # OpenCV and dependencies
 RUN apt-get install -y ffmpeg libsm6 libxext6
 RUN pip install opencv-python
+
+# Set up timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y apt-utils && \
+    apt-get install -q -y --no-install-recommends tzdata dirmngr gnupg2 build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+#########################################################################################################################################
+
+# tools for torch torchvision
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python-is-python3 \
+    libopenblas-base \
+    libopenmpi-dev \
+    libomp-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpython3-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libqt5websockets5-dev \
+    qtcreator \
+    qtbase5-dev \
+    qt5-qmake \
+    qtchooser \
+    qtbase5-dev-tools \
+    cmake \
+    libssl-dev \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+#########################################################################################################################################
+
+RUN apt-get update && apt-get install -y \
+    apt-utils \
+    curl \
+    software-properties-common \
+    build-essential \
+    clang-12 \
+    clang-format \
+    cmake \
+    g++ \
+    gcc \
+    gdb \
+    valgrind \
+    vim \
+    emacs \
+    iputils-ping \
+    less \
+    mesa-utils \
+    net-tools \
+    rsync \
+    screen \
+    tree \
+    unzip \
+    usbutils \
+    zip \
+    zsh \
+    wget \
+    htop \
+    ppa-purge \
+    libfreeimage3 \
+    libfreeimage-dev \
+    libopenblas-dev \
+    joystick \
+    ffmpeg \
+    espeak \
+    mpg123 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Git Large File Storage (git-lfs)
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install -y git-lfs && \
+    git lfs install 2>/dev/null
