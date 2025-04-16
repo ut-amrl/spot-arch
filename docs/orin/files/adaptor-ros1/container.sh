@@ -46,6 +46,7 @@ echo "Additional flags: $FLAGS"
 # Run the Docker container with the provided or default image name and flags
 set -x
 docker run -d \
+    -e PATH="/opt/nvidia/nsight-systems/2024.2.2/bin:$PATH" \
     --name $CONTAINER_NAME \
     --hostname orin \
     --runtime nvidia \
@@ -71,6 +72,8 @@ docker run -d \
     -v /run/user/${HOST_UID}/pulse/native:/run/user/0/pulse/native:rw \
     -v ${HOME}/.gitconfig:/root/.gitconfig:rw \
     -v /tmp:/tmp \
+    -v /opt/nvidia/nsight-systems/:/opt/nvidia/nsight-systems/ \
+    -v /usr/local/cuda/bin/ncu:/usr/local/bin/ncu \
     -u 0:0 \
     $FLAGS \
     $IMAGE_NAME \
