@@ -106,3 +106,8 @@ RUN apt-get update && apt-get install -y \
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
     apt-get install -y git-lfs && \
     git lfs install 2>/dev/null
+
+# install torchvision -- https://discuss.pytorch.org/t/how-can-i-install-torchvision-with-my-self-built-from-source-torch/209186/7
+WORKDIR /root/
+RUN git clone --branch release/0.18 https://github.com/pytorch/vision.git
+RUN cd vision && python setup.py bdist_wheel && pip install dist/torchvision-*
