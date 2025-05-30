@@ -73,7 +73,6 @@ docker run -d \
     -v ${HOME}/.gitconfig:/root/.gitconfig:rw \
     -v /tmp:/tmp \
     -v /opt/nvidia/nsight-systems/:/opt/nvidia/nsight-systems/ \
-    -v /usr/local/cuda/bin/ncu:/usr/local/bin/ncu \
     -u 0:0 \
     $FLAGS \
     $IMAGE_NAME \

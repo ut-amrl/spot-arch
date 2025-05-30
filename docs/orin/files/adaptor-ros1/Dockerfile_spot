@@ -139,3 +139,20 @@ RUN cd ~/custom_builds && \
 
 RUN mkdir -p /opt/ros && cd /opt/ros && ln -s /root/ros_noetic_build_2204/catkin_ws/devel noetic && cd ~
 RUN echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+
+
+# setup depth anything
+RUN cd ~/custom_builds && \
+    git clone https://github.com/DepthAnything/Depth-Anything-V2 && \
+    cd Depth-Anything-V2 && pip install -r requirements.txt
+RUN mkdir -p ~/.cache/depthany2/ 
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_hypersim_vits.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small/resolve/main/depth_anything_v2_metric_hypersim_vits.pth?download=true
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_hypersim_vitb.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Base/resolve/main/depth_anything_v2_metric_hypersim_vitb.pth?download=true
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_hypersim_vitl.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Large/resolve/main/depth_anything_v2_metric_hypersim_vitl.pth?download=true
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_vkitti_vits.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-VKITTI-Small/resolve/main/depth_anything_v2_metric_vkitti_vits.pth?download=true
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_vkitti_vitb.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-VKITTI-Base/resolve/main/depth_anything_v2_metric_vkitti_vitb.pth?download=true
+RUN wget -O ~/.cache/depthany2/depth_anything_v2_metric_vkitti_vitl.pth https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-VKITTI-Large/resolve/main/depth_anything_v2_metric_vkitti_vitl.pth?download=true
+RUN echo 'export PYTHONPATH=$PYTHONPATH:/root/custom_builds/Depth-Anything-V2' >> ~/.bashrc
+
+# setup ROS stuff
+RUN echo 'export ROS_PACKAGE_PATH=${ROS_PACKAGE_PATH}:/root/robot/ut-amrl/amrl_msgs:/root/robot/ut-amrl/spot_autonomy' >> /root/.bashrc

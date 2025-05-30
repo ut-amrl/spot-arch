@@ -57,12 +57,12 @@ if [ ! -f /initialized ]; then
 	# Copy and rename the launch file (not required since .launch itself pushed now)
 	#cp /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch.example /root/ut-amrl/spot_autonomy/launch/start_clearpath_spot.launch
 
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/local_rgb_map
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/amrl_msgs
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/k4a_ros
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/spot_autonomy
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/local_rgb_map
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/amrl_maps
 
 	# Build the amrl_msgs, k4a_ros, and spot_autonomy projects in order
 	cd /root/ut-amrl/amrl_msgs
@@ -151,12 +151,12 @@ if [ ! -f /initialized ]; then
 	fi
 
 	# Repos
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_msgs
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/k4a_ros
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/spot_autonomy
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/graph_navigation
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/local_rgb_map
-	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/ut-amrl/amrl_maps
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/amrl_msgs
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/k4a_ros
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/spot_autonomy
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/graph_navigation
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/local_rgb_map
+	export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/root/robot/ut-amrl/amrl_maps
 
 	# Add the Python path for the amrl_msgs package if it exists
 	if rospack find amrl_msgs &> /dev/null; then
