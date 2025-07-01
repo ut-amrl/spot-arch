@@ -1,0 +1,200 @@
+#FROM ros-noetic-desktop-full-arm64
+#FROM arm64v8/ubuntu:focal
+# already has torch (python as well as c++ libtorch) torchvision and opencv setup
+FROM dustynv/l4t-pytorch:r35.4.1
+
+# env vars
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV TZ=America/Chicago
+
+ENV DOCKERHOST_PYTHON_VERSION=3.8
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/lib
+ENV Torch_DIR=$Torch_DIR:/usr/local/lib/python${DOCKERHOST_PYTHON_VERSION}/dist-packages/torch/share/cmake/Torch
+
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+LABEL com.nvidia.volumes.needed="nvidia_driver"
+
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${PATH}:${CUDA_HOME}/bin
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
+ENV PIP_ROOT_USER_ACTION=ignore
+
+# Set up timezone
+RUN echo 'Etc/UTC' > /etc/timezone && \
+    ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
+    apt-get update && \
+    apt-get install -q -y apt-utils && \
+    apt-get install -q -y --no-install-recommends tzdata dirmngr gnupg2 build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Remove opencv so that we can install a specific version if needed
+RUN apt-get purge -y '*opencv*'
+#RUN find /usr -name "*opencv*4.5*" -exec rm -rf {} +
+
+#########################################################################################################################################
+
+# tools for torch torchvision
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python${DOCKERHOST_PYTHON_VERSION} \
+    python${DOCKERHOST_PYTHON_VERSION}-dev \
+    python3-pip \
+    python-is-python3 \
+    libopenblas-base \
+    libopenblas-dev \
+    libopenmpi-dev \
+    libomp-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpython3-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    cmake \
+    libssl-dev \
+    curl \
+    qt5-default \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+#########################################################################################################################################
+
+RUN apt-get update && apt-get install -y \
+    apt-utils \
+    curl \
+    software-properties-common \
+    build-essential \
+    clang-12 \
+    clang-format \
+    cmake \
+    g++ \
+    gcc \
+    gdb \
+    git \
+    nano \
+    valgrind \
+    vim \
+    emacs \
+    iputils-ping \
+    less \
+    mesa-utils \
+    net-tools \
+    rsync \
+    tmux \
+    screen \
+    tree \
+    unzip \
+    usbutils \
+    zip \
+    zsh \
+    wget \
+    htop \
+    ppa-purge \
+    libfreeimage3 \
+    libfreeimage-dev \
+    libopenblas-dev \
+    python3-tk \
+    joystick \
+    ffmpeg \
+    espeak \
+    mpg123 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Git Large File Storage (git-lfs)
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install -y git-lfs
+
+# not needed as forwarding audio from host
+#RUN apt-get update && apt-get install -y \
+#    alsa-base alsa-utils pulseaudio pavucontrol \
+#    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get autoclean -y && apt-get clean -y
+
+################################################################################################## (packages)
+
+# Install dependencies for amrl_shared_lib
+RUN apt-get update && apt-get install -y \
+    libgtest-dev libgoogle-glog-dev cmake build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install specific protobuf version and Bosdyn packages for spot (without ROS), bosydn version matches the sdk version onboard spot
+ARG BD_VER=4.0.2
+RUN pip3 install protobuf==3.20.1 && \
+    pip3 install cython empy virtualenv jetson-stats \
+    bosdyn-client==$BD_VER \
+    bosdyn-mission==$BD_VER \
+    bosdyn-api==$BD_VER \
+    bosdyn-core==$BD_VER \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for graph_navigation (non-ROS components)
+RUN apt-get update && apt-get install -y \
+    libgoogle-glog-dev libgflags-dev liblua5.1-0-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for enml
+RUN apt-get update && apt-get install -y \
+    liblua5.1-dev libeigen3-dev \
+    libjpeg8-dev libgoogle-perftools-dev \
+    libsuitesparse-dev libblas-dev liblapack-dev libopenmpi-dev \
+    libgoogle-glog-dev libgflags-dev libceres-dev libtbb-dev \
+    libncurses5-dev libpopt-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for webviz (non-ROS components)
+RUN apt-get update && apt-get install -y \
+    cmake qt5-default libqt5websockets5-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for k4a (non-ROS components)
+RUN apt-get update && apt-get install -y \
+    liblua5.1-0-dev \
+    libgflags-dev \
+    libgoogle-glog-dev \
+    libgoogle-perftools-dev \
+    cimg-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies for spot_autonomy (non-ROS components)
+RUN apt-get update && apt-get install -y \
+    qt5-default \
+    libqt5websockets5-dev \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add Microsoft repository and install Kinect SDK
+RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    apt-add-repository "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main" && \
+    apt-get update && ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev
+
+# Install Miniconda to /opt/miniconda
+RUN wget -O Miniconda3-py310_24.7.1-0-Linux-aarch64.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    bash Miniconda3-py310_24.7.1-0-Linux-aarch64.sh -b -p /opt/miniconda3 && \
+    rm Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
+    /opt/miniconda3/bin/conda config --set auto_activate_base false
+
+# conda bash completion
+RUN /opt/miniconda3/bin/conda install -c conda-forge conda-bash-completion -y
+
+RUN cp -r /usr/include/eigen3/* /usr/include/ && \
+    apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get autoclean -y && apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    git lfs install 2>/dev/null
+
+# Add Kinect udev rules
+COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
+#RUN udevadm control --reload-rules && udevadm trigger
+#RUN wget https://raw.githubusercontent.com/ut-amrl/k4a_ros/master/99-k4a.rules -O /etc/udev/rules.d/99-k4a.rules && \
+#    udevadm control --reload-rules && udevadm trigger
+
+# Copy entrypoint script
+COPY ./entrypoint.sh /
+
+# Set up the entrypoint and default command
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["bash"] 
