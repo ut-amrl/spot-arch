@@ -26,6 +26,7 @@ fi
 ROS_VERSION="noetic"
 CONTAINER_NAME="cobot-autonomy"
 IMAGE_NAME="cobot-autonomy"
+FLAGS=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -34,15 +35,15 @@ while [[ $# -gt 0 ]]; do
       ROS_VERSION="$2"
       shift 2
       ;;
-    --name)
+    --name) # Check for --name flag
       CONTAINER_NAME="$2"
-      shift 2
+      shift 2 # Shift past the flag and its value
       ;;
-    --*)
+    --*) # Any other argument starting with "--" is treated as a flag
       FLAGS="$FLAGS $1"
-      shift
+      shift # Move to next argument
       ;;
-    *)
+    *)  # Anything else is treated as the image name
       IMAGE_NAME="$1"
       shift
       ;;
@@ -83,7 +84,7 @@ docker run -it \
     --network host \
     --ipc host \
     --pid host \
-    -e ROS_IP=$(ip -4 addr show dev wg0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+    -e ROS_IP=$(ip -4 addr show dev wg0 | grep -oP '(?<=inet\s)\d+(\.\d+){3}') \
     -e HOST_UID=$HOST_UID \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     -v /tmp/.display_env_$HOST_UID:/tmp/.display_env_$HOST_UID:ro \
