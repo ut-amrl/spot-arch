@@ -259,6 +259,7 @@ RUN cp -r /usr/include/eigen3/* /usr/include/ && \
 
 # Copy entrypoint script
 COPY ./entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 
 # Set up the ROS entrypoint and default command
 ENTRYPOINT ["/entrypoint.sh"]

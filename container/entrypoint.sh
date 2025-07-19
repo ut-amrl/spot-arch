@@ -23,12 +23,19 @@ fi
 
 # Check if the initialization has already been done (using a marker file)
 if [ ! -f /initialized ]; then
-	echo "Running one-time setup..."
+	echo -e "\033[36m🔄 Running one-time setup...\033[0m"
 	
 	# weird pip install and cache bugfix (dec16 2024)
 	for file in /etc/xdg/pip/pip.conf /etc/pip.conf /usr/pip.conf /root/.config/pip/pip.conf /root/.pip/pip.conf; do [ -f "$file" ] && sed -i 's/^\s*\(no-cache-dir\s*=.*\)/# \1/' "$file" || true; done
 	
 	source "/opt/ros/$ROS_DISTRO/setup.bash"
+
+	# Setup cobot-autonomy
+	mkdir -p /root/ut-amrl
+	cd /root/ut-amrl
+	git clone --recursive https://github.com/ut-amrl/cobot_autonomy.git
+	# TODO: complete this
+	cd /root
 
 	# Create the marker file to indicate that initialization has been done
 	touch /initialized
