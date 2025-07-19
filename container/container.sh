@@ -74,6 +74,15 @@ if [ ! -f "/tmp/.ssh_auth_sock_$HOST_UID" ]; then
     echo -e "\033[33m⚠ WARNING: SSH auth sock file not found. Add bashrc configuration as described in README.md\033[0m"
 fi
 
+# Build mount flags conditionally
+MOUNT_FLAGS=""
+if [ -f "${HOME}/.gitconfig" ]; then
+    MOUNT_FLAGS="$MOUNT_FLAGS -v ${HOME}/.gitconfig:/root/.gitconfig:rw"
+fi
+if [ -f "${HOME}/.vimrc" ]; then
+    MOUNT_FLAGS="$MOUNT_FLAGS -v ${HOME}/.vimrc:/root/.vimrc:rw"
+fi
+
 # Run the Docker container with sophisticated configuration
 docker run -it \
     --name $CONTAINER_NAME \
@@ -91,10 +100,9 @@ docker run -it \
     -v /tmp/.ssh_auth_sock_$HOST_UID:/tmp/.ssh_auth_sock_$HOST_UID:ro \
     -v ${HOME}/.Xauthority:/root/.Xauthority:rw \
     -v /dev/dri:/dev/dri:ro \
-    -v ${HOME}/.gitconfig:/root/.gitconfig:rw \
-    -v ${HOME}/.vimrc:/root/.vimrc:rw \
     -v /etc/passwd:/etc/passwd:ro \
     -v /etc/group:/etc/group:ro \
     --user 0:0 \
+    $MOUNT_FLAGS \
     $FLAGS \
     $IMAGE_NAME
