@@ -43,6 +43,7 @@
         X11Forwarding yes
         X11DisplayOffset 10
         X11UseLocalhost no
+        AllowAgentForwarding yes
         ```
     - `sudo systemctl restart ssh`
 
