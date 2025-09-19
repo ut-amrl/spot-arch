@@ -21,13 +21,21 @@ ENV PATH=${PATH}:${CUDA_HOME}/bin
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
 ENV PIP_ROOT_USER_ACTION=ignore
 
-# Set up timezone
-RUN echo 'Etc/UTC' > /etc/timezone && \
-    ln -sf /usr/share/zoneinfo/Etc/UTC /etc/localtime && \
-    apt-get update && \
-    apt-get install -q -y apt-utils && \
-    apt-get install -q -y --no-install-recommends tzdata dirmngr gnupg2 build-essential && \
-    rm -rf /var/lib/apt/lists/*
+# Base system setup, utilities, and timezone configuration
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    tzdata \
+    curl \
+    wget \
+    gnupg2 \
+    lsb-release \
+    dirmngr \
+    apt-utils \
+    software-properties-common \
+    && ln -sf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
 
 # ros humble
 RUN locale
@@ -38,9 +46,11 @@ RUN locale
 RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository universe
 
-RUN apt-get update && apt-get install -y curl
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" > /etc/apt/sources.list.d/ros2.list
+RUN apt-get update && apt-get install -y curl libopenjp2-7-dev
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros2.list \
+    && apt-get update && apt-get install -y ros2-apt-source \
+    && rm /etc/apt/sources.list.d/ros2.list
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y ros-humble-desktop-full
@@ -67,6 +77,14 @@ CMD ["bash"]
 # bootstrap rosdep
 RUN rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO
+
+# Install CMake (apt's version is outdated)
+RUN wget https://cmake.org/files/v3.26/cmake-3.26.0-linux-aarch64.sh -O /tmp/cmake.sh && \
+    mkdir -p /opt/cmake && \
+    sh /tmp/cmake.sh --prefix=/opt/cmake --skip-license && \
+    ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake && \
+    rm /tmp/cmake.sh && \
+    cmake --version
 
 #########################################################################################################################################
 
@@ -110,9 +128,13 @@ RUN apt-get update && apt-get install -y \
     cmake \
     g++ \
     gcc \
+    gcc-10 \
+    g++-10 \
     gdb \
     git \
     nano \
+    ninja-build \
+    python3-tk \
     valgrind \
     vim \
     emacs \
@@ -174,8 +196,8 @@ RUN apt-get update && apt-get install -y \
 
 # Install specific protobuf version and Bosdyn packages for spot_ros, bosydn version matches the sdk version onboard spot
 ARG BD_VER=4.0.2
-RUN pip3 install protobuf==3.20.1 && \
-    pip3 install cython empy virtualenv jetson-stats rospkg ros2-numpy \
+RUN pip3 install --index-url https://pypi.org/simple/ protobuf==3.20.1 && \
+    pip3 install --index-url https://pypi.org/simple/ cython empy virtualenv jetson-stats rospkg ros2-numpy \
     bosdyn-client==$BD_VER \
     bosdyn-mission==$BD_VER \
     bosdyn-api==$BD_VER \

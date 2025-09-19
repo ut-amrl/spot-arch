@@ -48,6 +48,7 @@ docker run -it \
     --runtime nvidia \
     --network host \
     --ipc host \
+    --gpus all \
     --workdir /root \
     --group-add dialout \
     --privileged \
