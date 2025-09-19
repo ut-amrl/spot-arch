@@ -238,38 +238,6 @@ RUN apt-get update && apt-get install -y \
     libgflags-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# # Add Microsoft repository and install Kinect SDK
-# RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-#     apt-add-repository "deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main" && \
-#     apt-get update && ACCEPT_EULA=Y apt-get install -y k4a-tools libk4a1.4 libk4a1.4-dev
-
-# Switch to Ubuntu 20.04 (Focal) sources temporarily for libsoundio1 installation
-RUN cp /etc/apt/sources.list /etc/apt/sources.list.backup && \
-    sed -i 's/jammy/focal/g' /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y libsoundio1
-
-RUN wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4/libk4a1.4_1.4.2_arm64.deb && \
-    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/libk/libk4a1.4-dev/libk4a1.4-dev_1.4.2_arm64.deb && \
-    wget https://packages.microsoft.com/ubuntu/18.04/multiarch/prod/pool/main/k/k4a-tools/k4a-tools_1.4.2_arm64.deb
-
-
-RUN echo 'libk4a1.4 libk4a1.4/accepted-eula-hash string 0f5d5c5de396e4fee4c0753a21fee0c1ed726cf0316204edda484f08cb266d76' | debconf-set-selections && \
-    echo 'libk4a1.4 libk4a1.4/accept-eula boolean true' | debconf-set-selections && \
-    dpkg -i libk4a1.4_1.4.2_arm64.deb && \
-    dpkg -i libk4a1.4-dev_1.4.2_arm64.deb && \
-    dpkg -i k4a-tools_1.4.2_arm64.deb
-
-# Restore the original sources list for Ubuntu 22.04 (Jammy)
-RUN mv /etc/apt/sources.list.backup /etc/apt/sources.list && \
-    apt-get update
-
-# Add Kinect udev rules
-COPY ./99-k4a.rules /etc/udev/rules.d/99-k4a.rules
-#RUN udevadm control --reload-rules && udevadm trigger
-#RUN wget https://raw.githubusercontent.com/ut-amrl/k4a_ros/master/99-k4a.rules -O /etc/udev/rules.d/99-k4a.rules && \
-#    udevadm control --reload-rules && udevadm trigger
-
 # Install Miniconda to /opt/miniconda
 RUN wget -O Miniconda3-py310_24.7.1-0-Linux-aarch64.sh https://repo.anaconda.com/miniconda/Miniconda3-py310_24.7.1-0-Linux-aarch64.sh && \
     bash Miniconda3-py310_24.7.1-0-Linux-aarch64.sh -b -p /opt/miniconda3 && \
